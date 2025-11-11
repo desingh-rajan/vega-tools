@@ -342,6 +342,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // ============================================
+  // HERO CONTENT BOX - CURSOR TRACKING EFFECT
+  // ============================================
+  const heroContent = document.querySelector(".hero-content");
+
+  if (heroContent) {
+    heroContent.addEventListener("mousemove", (e) => {
+      const rect = heroContent.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = (y - centerY) / 30;
+      const rotateY = (centerX - x) / 30;
+
+      heroContent.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    });
+
+    heroContent.addEventListener("mouseleave", () => {
+      heroContent.style.transform =
+        "perspective(1000px) rotateX(0) rotateY(0) scale(1)";
+    });
+  }
+
   console.log(
     "🔨 Vega Tools and Hardwares - Landing page loaded successfully!"
   );
