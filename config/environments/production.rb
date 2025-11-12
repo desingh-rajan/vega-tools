@@ -84,7 +84,7 @@ Rails.application.configure do
     "vegatoolsandhardwares.in",     # Allow requests from vegatoolsandhardwares.in
     /.*\.vegatoolsandhardwares\.in/ # Allow requests from subdomains
   ]
-  #
+
   # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
