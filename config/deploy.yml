@@ -22,7 +22,7 @@ servers:
 #
 proxy:
   ssl: true
-  host: vegatoolsandhardwares.in
+  host: vegatoolsandhardwares.in,www.vegatoolsandhardwares.in
 
 # Where you keep your container images.
 registry:

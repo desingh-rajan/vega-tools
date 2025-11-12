@@ -33,5 +33,8 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Ignore Kamal secrets
+/.kamal/secrets
+
 # Ignore client resources (product images and logos)
 /client-resources
