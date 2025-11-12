@@ -1,13 +1,13 @@
 # Name of your application. Used to uniquely configure containers.
-service: vega_tools
+service: vega-tools
 
 # Name of the container image (use your-user/app-name on external registries).
-image: vega_tools
+image: desinghrajan/vega-tools
 
 # Deploy to these servers.
 servers:
   web:
-    - 192.168.0.1
+    - 139.84.144.43
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -20,21 +20,19 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# proxy:
-#   ssl: true
-#   host: app.example.com
+proxy:
+  ssl: true
+  host: vegatoolsandhardwares.in
 
 # Where you keep your container images.
 registry:
   # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  server: localhost:5555
-
-  # Needed for authenticated registries.
-  # username: your-user
+  server: hub.docker.com
+  username: desinghrajan
 
   # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
