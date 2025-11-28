@@ -23,6 +23,33 @@
 
   <!-- Hero Section 1 -->
   <section class="hero hero-1" id="home">
+    <!-- Image Carousel Background -->
+    <div class="hero-carousel" data-controller="carousel">
+      <div class="carousel-slide active"></div>
+      <div class="carousel-slide"></div>
+      <div class="carousel-slide"></div>
+      <div class="carousel-slide"></div>
+      
+      <!-- Carousel Navigation Arrows -->
+      <button class="carousel-arrow prev" data-action="carousel#prev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="carousel-arrow next" data-action="carousel#next" aria-label="Next slide">
+        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+      </button>
+      
+      <!-- Carousel Dots -->
+      <div class="carousel-dots">
+        <button class="carousel-dot active" data-action="carousel#goToSlide" data-index="0" aria-label="Go to slide 1"></button>
+        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="1" aria-label="Go to slide 2"></button>
+        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="2" aria-label="Go to slide 3"></button>
+        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="3" aria-label="Go to slide 4"></button>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="carousel-progress"></div>
+    </div>
+    
     <div class="hero-background">
       <div class="animated-grid"></div>
       <div class="floating-tools">
