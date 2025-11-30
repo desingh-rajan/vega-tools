@@ -40,8 +40,8 @@ rails generate active_admin:install --use_existing_user
 rails generate model Category name:string slug:string description:text icon:string position:integer parent_id:integer:index
 rails generate model Product name:string slug:string sku:string description:text price:decimal discounted_price:decimal brand:string specifications:jsonb published:boolean category:references
 
-# 6. Generate SiteSetting (singleton)
-rails generate model SiteSetting site_name:string tagline:string hero_title:string hero_subtitle:string about_text:text address:text phone:string email:string store_hours:text google_maps_url:string stats:jsonb about_features:jsonb social_links:jsonb
+# 6. Generate SiteSetting (key-value pattern like tstack-kit)
+rails generate model SiteSetting key:string:uniq category:string value:jsonb is_system:boolean is_public:boolean description:text updated_by:references
 
 # 7. Run migrations
 rails db:migrate
@@ -124,22 +124,120 @@ class Product < ApplicationRecord
 end
 ```
 
-### SiteSetting Model (Singleton)
+### SiteSetting Model (Key-Value Pattern - like tstack-kit)
 
 ```ruby
 # app/models/site_setting.rb
+# Key-value based settings with JSON values (following tstack-kit pattern)
 class SiteSetting < ApplicationRecord
-  has_one_attached :logo
-  has_many_attached :carousel_images
+  CATEGORIES = %w[general appearance contact sections features].freeze
+  
+  SYSTEM_KEYS = %w[
+    site_info contact_info hero_section stats_section 
+    about_section social_links theme_config
+  ].freeze
 
-  def self.instance
-    first_or_create!(
-      site_name: "Vega Tools & Hardwares",
-      tagline: "Building your dreams with quality tools",
-      hero_title: "Dindigul's #1 Tool Store",
-      hero_subtitle: "Premium Tools, Trusted Service"
-    )
+  belongs_to :updated_by, class_name: "User", optional: true
+  has_one_attached :logo
+  has_many_attached :images  # For carousel, etc.
+
+  validates :key, presence: true, uniqueness: true
+  validates :category, presence: true, inclusion: { in: CATEGORIES }
+
+  scope :public_settings, -> { where(is_public: true) }
+  scope :by_category, ->(cat) { where(category: cat) }
+
+  # Get by key with auto-seed for system settings
+  def self.get(key)
+    find_by(key: key) || (SYSTEM_KEYS.include?(key) ? seed_system_setting(key) : nil)
   end
+
+  def self.value_for(key)
+    get(key)&.value || {}
+  end
+
+  private_class_method def self.seed_system_setting(key)
+    defaults = DEFAULTS[key]
+    return nil unless defaults
+    
+    create!(key: key, **defaults, is_system: true)
+  end
+
+  DEFAULTS = {
+    "site_info" => {
+      category: "general", is_public: true,
+      description: "Basic site information",
+      value: {
+        "site_name" => "Vega Tools & Hardwares",
+        "tagline" => "Building your dreams with quality tools",
+        "description" => "Dindigul's #1 Tool Store - Authorized POLYMAK dealer"
+      }
+    },
+    "contact_info" => {
+      category: "contact", is_public: true,
+      description: "Contact details",
+      value: {
+        "phone" => "095007 16588",
+        "email" => "contact@vegatools.in",
+        "address" => "No. 583/4B, Dindigul - Trichy Bypass Road, Rajakkapatti, EB Colony, Dindigul District, Tamil Nadu 624004",
+        "google_maps_url" => "https://maps.app.goo.gl/eQ6RmoxqpgrFpksp7",
+        "store_hours" => "Monday - Saturday: 9 AM - 8 PM"
+      }
+    },
+    "hero_section" => {
+      category: "sections", is_public: true,
+      description: "Hero section content",
+      value: {
+        "title_line1" => "Dindigul's #1 Tool Store",
+        "title_line2" => "Premium Tools, Trusted Service",
+        "subtitle" => "Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions"
+      }
+    },
+    "stats_section" => {
+      category: "sections", is_public: true,
+      description: "Stats displayed on landing page",
+      value: {
+        "stat1" => { "number" => "4.8⭐", "label" => "Google Rating" },
+        "stat2" => { "number" => "500+", "label" => "Power Tools" },
+        "stat3" => { "number" => "100+", "label" => "Genuine Products" }
+      }
+    },
+    "about_section" => {
+      category: "sections", is_public: true,
+      description: "About section content",
+      value: {
+        "title" => "About Vega Tools and Hardwares",
+        "paragraphs" => [
+          "Located on Trichy Road in Dindigul District, Tamil Nadu, Vega Tools and Hardwares is your trusted partner for professional power tools and safety equipment.",
+          "With a 4.8-star rating and hundreds of satisfied customers, we serve contractors, builders, and industrial clients across Dindigul and surrounding regions."
+        ],
+        "features" => [
+          "Authorized POLYMAK Dealer",
+          "Complete Safety Equipment",
+          "Professional Grade Tools",
+          "Expert Technical Support"
+        ]
+      }
+    },
+    "social_links" => {
+      category: "contact", is_public: true,
+      description: "Social media links",
+      value: {
+        "whatsapp" => "https://wa.me/919500716588",
+        "instagram" => "",
+        "facebook" => ""
+      }
+    },
+    "theme_config" => {
+      category: "appearance", is_public: true,
+      description: "Theme and appearance settings",
+      value: {
+        "primary_color" => "#f59e0b",
+        "secondary_color" => "#1e293b",
+        "font_family" => "Inter, system-ui, sans-serif"
+      }
+    }
+  }.freeze
 end
 ```
 
@@ -175,8 +273,74 @@ User.find_or_create_by!(email: "admin@vegatools.in") do |u|
   u.name = "Super Admin"
 end
 
-# Create site settings
-SiteSetting.instance
+# Seed all system site settings
+SiteSetting::SYSTEM_KEYS.each { |key| SiteSetting.get(key) }
+```
+
+### Active Admin for Site Settings
+
+```ruby
+# app/admin/site_settings.rb
+ActiveAdmin.register SiteSetting do
+  menu label: "Site Settings", priority: 1
+
+  permit_params :key, :category, :value, :is_public, :description
+
+  index do
+    selectable_column
+    column :key
+    column :category
+    column :is_system
+    column :is_public
+    column :updated_at
+    actions
+  end
+
+  show do
+    attributes_table do
+      row :key
+      row :category
+      row :is_system
+      row :is_public
+      row :description
+      row :value do |setting|
+        pre JSON.pretty_generate(setting.value)
+      end
+      row :updated_at
+      row :updated_by
+    end
+  end
+
+  form do |f|
+    f.inputs do
+      f.input :key, input_html: { disabled: f.object.is_system? }
+      f.input :category, as: :select, collection: SiteSetting::CATEGORIES
+      f.input :value, as: :text, input_html: { rows: 15 }, 
+              hint: "JSON format - be careful with syntax!"
+      f.input :is_public
+      f.input :description
+    end
+    f.actions
+  end
+
+  # Custom action to reset system setting to defaults
+  member_action :reset, method: :post do
+    setting = SiteSetting.find(params[:id])
+    if setting.is_system? && SiteSetting::DEFAULTS[setting.key]
+      setting.update!(value: SiteSetting::DEFAULTS[setting.key][:value])
+      redirect_to admin_site_setting_path(setting), notice: "Reset to defaults!"
+    else
+      redirect_to admin_site_setting_path(setting), alert: "Cannot reset non-system setting"
+    end
+  end
+
+  action_item :reset, only: :show do
+    if resource.is_system?
+      link_to "Reset to Defaults", reset_admin_site_setting_path(resource), method: :post,
+              data: { confirm: "Reset this setting to default values?" }
+    end
+  end
+end
 ```
 
 ### Files to Create After Models
