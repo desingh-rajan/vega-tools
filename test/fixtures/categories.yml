@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+power_tools:
+  name: Power Tools
+  slug: power-tools
+  description: All power tools
+  position: 1
+  active: true
+
+drills:
+  name: Drills
+  slug: drills
+  description: Drilling machines
+  position: 1
+  parent: power_tools
+  active: true
+
+inactive_category:
+  name: Inactive Category
+  slug: inactive
+  description: This is inactive
+  position: 1
+  active: false

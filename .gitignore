@@ -38,3 +38,6 @@
 
 # Ignore client resources (product images and logos)
 /client-resources
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

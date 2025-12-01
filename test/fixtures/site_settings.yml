@@ -1,0 +1,47 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+site_info:
+  key: site_info
+  category: general
+  is_public: true
+  is_system: true
+  value:
+    name: "Test Store"
+    tagline: "Best Tools"
+    logo_url: "/logo.png"
+
+contact_info:
+  key: contact_info
+  category: contact
+  is_public: true
+  is_system: true
+  value:
+    phone: "+91 1234567890"
+    email: "test@example.com"
+    whatsapp: "+91 1234567890"
+
+hero_section:
+  key: hero_section
+  category: sections
+  is_public: true
+  is_system: true
+  value:
+    title: "Welcome"
+    subtitle: "Shop Now"
+
+social_links:
+  key: social_links
+  category: contact
+  is_public: true
+  is_system: true
+  value:
+    facebook: "https://facebook.com/test"
+    instagram: "https://instagram.com/test"
+
+footer_content:
+  key: footer_content
+  category: general
+  is_public: true
+  is_system: false
+  value:
+    copyright: "2024 Test Store"

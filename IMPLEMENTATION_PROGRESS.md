@@ -1,11 +1,12 @@
 # Vega Tools - E-commerce Implementation Progress
 
-**GitHub Issue:** https://github.com/desingh-rajan/vega-tools/issues/12
+**GitHub Issue:** <https://github.com/desingh-rajan/vega-tools/issues/12>
 **Feature Branch:** `feature/ecommerce-foundation`
 
 ## Current State: Phase 1 - Gemfile Updated ✅
 
 ### What's Done
+
 - [x] Created GitHub issue #12 with full checklist
 - [x] Updated Gemfile with required gems:
   - `bcrypt` (uncommented)
@@ -359,10 +360,12 @@ end
 ### OAuth Setup Required
 
 Create OAuth credentials at:
-- Google: https://console.cloud.google.com/apis/credentials
-- Facebook: https://developers.facebook.com/apps/
+
+- Google: <https://console.cloud.google.com/apis/credentials>
+- Facebook: <https://developers.facebook.com/apps/>
 
 Add to `config/credentials.yml.enc`:
+
 ```yaml
 google:
   client_id: YOUR_CLIENT_ID
