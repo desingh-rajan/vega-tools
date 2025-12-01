@@ -16,6 +16,7 @@
 ### The Problem
 
 ActiveAdmin 3.x with Rails 8 + Propshaft causes **CSS pollution** on public pages:
+
 - All links get ugly underlines
 - Link colors change to blue
 - Font styles get overridden

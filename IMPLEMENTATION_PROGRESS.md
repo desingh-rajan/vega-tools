@@ -23,20 +23,24 @@ When using **ActiveAdmin 3.x** with **Rails 8 + Propshaft** (the modern asset pi
 3. `dartsass-rails` compiles `app/assets/stylesheets/active_admin.scss` → `app/assets/builds/active_admin.css`
 4. **Propshaft serves ALL files from `app/assets/builds/` globally on every page**
 5. ActiveAdmin's CSS includes a **normalize reset** with rules like:
+
    ```css
    a, a:link, a:visited { color: #38678b; text-decoration: underline; }
    ```
+
 6. This overrides your custom CSS on the public frontend!
 
 ### The Solution
 
 **Step 1: Remove `dartsass-rails` from Gemfile**
+
 ```ruby
 # DON'T use this with Propshaft + ActiveAdmin
 # gem "dartsass-rails"  # REMOVE THIS
 ```
 
 **Step 2: Compile ActiveAdmin CSS once to `vendor/assets/`**
+
 ```bash
 # Create vendor directory
 mkdir -p vendor/assets/stylesheets
@@ -53,12 +57,14 @@ EOF
 ```
 
 **Step 3: Configure Propshaft to include vendor assets**
+
 ```ruby
 # config/initializers/assets.rb
 Rails.application.config.assets.paths << Rails.root.join("vendor", "assets", "stylesheets")
 ```
 
 **Step 4: Remove any `active_admin.scss` from `app/assets/stylesheets/`**
+
 ```bash
 rm -f app/assets/stylesheets/active_admin.scss
 rm -f app/assets/builds/active_admin.css
@@ -86,6 +92,7 @@ rm -f app/assets/builds/active_admin.css
 ### For Future Projects (tstack-rails-kit)
 
 Always remember:
+
 1. **Never put ActiveAdmin CSS in `app/assets/builds/`** - Propshaft serves everything from there globally
 2. **Pre-compile ActiveAdmin CSS to `vendor/assets/`** - it's loaded only by ActiveAdmin's layout
 3. **Don't use dartsass-rails just for ActiveAdmin** - overkill and causes conflicts
