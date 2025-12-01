@@ -3,18 +3,132 @@
 **GitHub Issue:** <https://github.com/desingh-rajan/vega-tools/issues/12>
 **Feature Branch:** `feature/ecommerce-foundation`
 
-## Current State: Phase 1 - Gemfile Updated ✅
+---
+
+## 🚨 CRITICAL: ActiveAdmin + Propshaft CSS Conflict (SOLVED)
+
+### The Problem
+
+When using **ActiveAdmin 3.x** with **Rails 8 + Propshaft** (the modern asset pipeline), the ActiveAdmin CSS pollutes the entire frontend, causing:
+
+- Ugly underlines on all links (navbar, buttons, footer)
+- Broken link colors
+- Overridden font styles
+- General CSS chaos on public pages
+
+### Root Cause
+
+1. ActiveAdmin requires SCSS compilation (it ships `.scss` files, not pre-compiled CSS)
+2. The `dartsass-rails` gem was added to compile ActiveAdmin's SCSS
+3. `dartsass-rails` compiles `app/assets/stylesheets/active_admin.scss` → `app/assets/builds/active_admin.css`
+4. **Propshaft serves ALL files from `app/assets/builds/` globally on every page**
+5. ActiveAdmin's CSS includes a **normalize reset** with rules like:
+   ```css
+   a, a:link, a:visited { color: #38678b; text-decoration: underline; }
+   ```
+6. This overrides your custom CSS on the public frontend!
+
+### The Solution
+
+**Step 1: Remove `dartsass-rails` from Gemfile**
+```ruby
+# DON'T use this with Propshaft + ActiveAdmin
+# gem "dartsass-rails"  # REMOVE THIS
+```
+
+**Step 2: Compile ActiveAdmin CSS once to `vendor/assets/`**
+```bash
+# Create vendor directory
+mkdir -p vendor/assets/stylesheets
+
+# Compile ActiveAdmin CSS (run once)
+aa_gem_path=$(bundle info activeadmin --path)
+sass --load-path="$aa_gem_path/app/assets/stylesheets" \
+     --quiet-deps \
+     -I "$aa_gem_path/app/assets/stylesheets" \
+     - <<'EOF' > vendor/assets/stylesheets/active_admin.css
+@import "active_admin/mixins";
+@import "active_admin/base";
+EOF
+```
+
+**Step 3: Configure Propshaft to include vendor assets**
+```ruby
+# config/initializers/assets.rb
+Rails.application.config.assets.paths << Rails.root.join("vendor", "assets", "stylesheets")
+```
+
+**Step 4: Remove any `active_admin.scss` from `app/assets/stylesheets/`**
+```bash
+rm -f app/assets/stylesheets/active_admin.scss
+rm -f app/assets/builds/active_admin.css
+```
+
+### Why This Works
+
+- `vendor/assets/` is in Propshaft's load path but NOT in `app/assets/builds/`
+- ActiveAdmin's engine finds `active_admin.css` in the asset path for admin pages
+- The main application layout (`stylesheet_link_tag :app`) only loads CSS from `app/assets/`
+- Public frontend remains clean, admin panel has its styles
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `Gemfile` | Remove `dartsass-rails` |
+| `Procfile.dev` | Remove `css: bin/rails dartsass:watch` |
+| `config/initializers/assets.rb` | Add vendor path |
+| `vendor/assets/stylesheets/active_admin.css` | Add compiled CSS |
+| `app/assets/stylesheets/active_admin.scss` | DELETE |
+| `app/assets/builds/active_admin.css` | DELETE |
+| `lib/tasks/active_admin_assets.rake` | DELETE |
+
+### For Future Projects (tstack-rails-kit)
+
+Always remember:
+1. **Never put ActiveAdmin CSS in `app/assets/builds/`** - Propshaft serves everything from there globally
+2. **Pre-compile ActiveAdmin CSS to `vendor/assets/`** - it's loaded only by ActiveAdmin's layout
+3. **Don't use dartsass-rails just for ActiveAdmin** - overkill and causes conflicts
+4. **Restart Rails server after changing asset paths** - Propshaft caches paths on boot
+
+---
+
+## Current State: Phase 2 - Foundation Complete ✅
 
 ### What's Done
 
 - [x] Created GitHub issue #12 with full checklist
-- [x] Updated Gemfile with required gems:
-  - `bcrypt` (uncommented)
-  - `devise`
-  - `omniauth-google-oauth2`
-  - `omniauth-facebook`
-  - `omniauth-rails_csrf_protection`
-  - `activeadmin` (~> 3.4)
+- [x] Updated Gemfile with required gems
+- [x] Installed Devise authentication
+- [x] User model with roles (user, admin, super_admin)
+- [x] Installed ActiveAdmin at `/admin`
+- [x] **Fixed ActiveAdmin CSS conflict with Propshaft** ⚠️ CRITICAL
+- [x] Category model (self-referential for infinite nesting)
+- [x] Product model with Active Storage images
+- [x] SiteSetting model (key-value JSON pattern)
+- [x] API v1 endpoints for Categories, Products, SiteSettings
+- [x] Seeds for demo data
+- [x] Admin panel resources for all models
+
+### What's Working
+
+| Feature | Status | URL |
+|---------|--------|-----|
+| Public Homepage | ✅ | `localhost:3000` |
+| Admin Dashboard | ✅ | `localhost:3000/admin` |
+| Admin Categories | ✅ | `localhost:3000/admin/categories` |
+| Admin Products | ✅ | `localhost:3000/admin/products` |
+| Admin Users | ✅ | `localhost:3000/admin/users` |
+| Admin Site Settings | ✅ | `localhost:3000/admin/site_settings` |
+| API Categories | ✅ | `localhost:3000/api/v1/categories` |
+| API Products | ✅ | `localhost:3000/api/v1/products` |
+
+### Admin Login
+
+```
+Email: admin@vegatools.in
+Password: changeme123
+```
 
 ### Next Steps (Run These Commands)
 

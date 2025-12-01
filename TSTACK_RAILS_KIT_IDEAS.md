@@ -5,7 +5,86 @@
 **Source Project:** vega-tools
 **Target Project:** tstack-rails-kit (future)
 **Rails Version:** 8.1.1
-**Last Updated:** 2025-12-01
+**Last Updated:** 2025-12-02
+
+---
+
+## 🚨 CRITICAL: ActiveAdmin + Propshaft Setup
+
+> **This section documents a painful issue that took hours to debug. Follow these steps exactly to avoid CSS conflicts.**
+
+### The Problem
+
+ActiveAdmin 3.x with Rails 8 + Propshaft causes **CSS pollution** on public pages:
+- All links get ugly underlines
+- Link colors change to blue
+- Font styles get overridden
+- Your beautiful frontend becomes a mess
+
+### Why It Happens
+
+1. ActiveAdmin ships SCSS files (not pre-compiled CSS)
+2. You might add `dartsass-rails` to compile them
+3. Dartsass compiles to `app/assets/builds/active_admin.css`
+4. **Propshaft loads ALL CSS from `app/assets/builds/` on EVERY page**
+5. ActiveAdmin's normalize reset (`text-decoration: underline` on links) breaks your frontend
+
+### The Correct Setup
+
+**1. Do NOT use `dartsass-rails`**
+
+```ruby
+# Gemfile - DON'T add this!
+# gem "dartsass-rails"
+```
+
+**2. Pre-compile ActiveAdmin CSS once to vendor folder**
+
+```bash
+mkdir -p vendor/assets/stylesheets
+
+aa_gem_path=$(bundle info activeadmin --path)
+sass --load-path="$aa_gem_path/app/assets/stylesheets" \
+     --quiet-deps \
+     - <<'EOF' > vendor/assets/stylesheets/active_admin.css
+@import "active_admin/mixins";
+@import "active_admin/base";
+EOF
+```
+
+**3. Add vendor path to Propshaft**
+
+```ruby
+# config/initializers/assets.rb
+Rails.application.config.assets.paths << Rails.root.join("vendor", "assets", "stylesheets")
+```
+
+**4. Commit the compiled CSS**
+
+```bash
+git add vendor/assets/stylesheets/active_admin.css
+```
+
+### Why This Works
+
+- `vendor/assets/` is in Propshaft's load path for asset resolution
+- BUT it's NOT in `app/assets/builds/` which gets bundled into `:app`
+- ActiveAdmin's engine finds `active_admin.css` when rendering admin pages
+- Your public frontend only loads YOUR CSS from `app/assets/stylesheets/`
+
+### File Structure
+
+```
+app/assets/
+├── builds/           # DO NOT put active_admin.css here!
+│   └── .keep
+├── stylesheets/
+│   ├── application.css
+│   └── pages.css     # Your frontend styles
+vendor/assets/
+└── stylesheets/
+    └── active_admin.css  # Pre-compiled, only loaded by admin
+```
 
 ---
 
@@ -16,6 +95,7 @@
 3. **Key-Value Site Settings** - Flexible JSON-based configuration
 4. **API-First Design** - JSON endpoints for mobile/Flutter apps
 5. **100% Test Coverage** - All public APIs and admin endpoints tested
+6. **Propshaft-Safe ActiveAdmin** - Pre-compiled CSS in vendor folder
 
 ---
 
