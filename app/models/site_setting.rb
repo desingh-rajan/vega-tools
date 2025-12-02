@@ -1,10 +1,27 @@
 class SiteSetting < ApplicationRecord
   CATEGORIES = %w[general appearance contact sections features].freeze
 
-  SYSTEM_KEYS = %w[
-    site_info contact_info hero_section stats_section
-    about_section social_links theme_config
-  ].freeze
+  # Load defaults from YAML files (config/site_settings/*.yml)
+  # This is memoized and loaded once at boot time
+  def self.load_defaults_from_yaml
+    defaults = {}
+    yaml_dir = Rails.root.join("config", "site_settings")
+
+    Dir.glob(yaml_dir.join("*.yml")).each do |file|
+      yaml_content = YAML.load_file(file, permitted_classes: [ Symbol ]) || {}
+      yaml_content.each do |key, config|
+        defaults[key] = config.deep_symbolize_keys
+      end
+    end
+
+    defaults.freeze
+  end
+
+  # Memoized DEFAULTS loaded from YAML
+  DEFAULTS = load_defaults_from_yaml
+
+  # System keys are all keys defined in YAML defaults
+  SYSTEM_KEYS = DEFAULTS.keys.map(&:to_s).freeze
 
   # Associations
   belongs_to :updated_by, class_name: "User", optional: true
@@ -24,20 +41,68 @@ class SiteSetting < ApplicationRecord
   scope :system_settings, -> { where(is_system: true) }
 
   # Get by key with auto-seed for system settings
+  # Returns the record (or creates it from defaults if it's a system setting)
   def self.get(key)
-    find_by(key: key) || (SYSTEM_KEYS.include?(key.to_s) ? seed_system_setting(key.to_s) : nil)
+    find_by(key: key) || (system_key?(key) ? seed_system_setting(key.to_s) : nil)
   end
 
-  # Get value for a key (returns hash)
+  # Get value for a key - ALWAYS returns a value
+  # Priority: database value > YAML default > empty hash
+  # This ensures defaults are ALWAYS available even if admin deletes the setting
   def self.value_for(key)
-    get(key)&.value || {}
+    record = find_by(key: key)
+    return record.value if record.present?
+
+    # Fallback to YAML defaults (bulletproof)
+    default_value_for(key)
   end
 
-  # Bulk get multiple settings
+  # Get the default value for a key from YAML
+  def self.default_value_for(key)
+    defaults = DEFAULTS[key.to_s] || DEFAULTS[key.to_sym]
+    return {} unless defaults
+
+    # YAML stores as symbol keys, we return stringified for consistency
+    (defaults[:value] || {}).deep_stringify_keys
+  end
+
+  # Get full default config (category, description, value, etc.)
+  def self.default_config_for(key)
+    DEFAULTS[key.to_s] || DEFAULTS[key.to_sym]
+  end
+
+  # Check if a key is a system setting
+  def self.system_key?(key)
+    SYSTEM_KEYS.include?(key.to_s)
+  end
+
+  # Bulk get multiple settings (always returns values)
   def self.get_all(*keys)
     keys.flatten.each_with_object({}) do |key, hash|
       hash[key.to_s] = value_for(key)
     end
+  end
+
+  # Reset a setting to its default value
+  def self.reset_to_default(key)
+    record = find_by(key: key)
+    return seed_system_setting(key.to_s) unless record
+
+    defaults = default_config_for(key)
+    return record unless defaults
+
+    record.update!(value: defaults[:value].deep_stringify_keys)
+    record
+  end
+
+  # Reset ALL system settings to defaults
+  def self.reset_all_to_defaults
+    SYSTEM_KEYS.each { |key| reset_to_default(key) }
+  end
+
+  # Seed all system settings (useful in seeds.rb or rake task)
+  def self.seed_all_system_settings
+    SYSTEM_KEYS.each { |key| get(key) }
   end
 
   # For Ransack search (Active Admin)
@@ -52,101 +117,19 @@ class SiteSetting < ApplicationRecord
   private
 
   def self.seed_system_setting(key)
-    defaults = DEFAULTS[key]
+    defaults = default_config_for(key)
     return nil unless defaults
 
     create!(
       key: key,
-      category: defaults[:category],
-      value: defaults[:value],
+      category: defaults[:category].to_s,
+      value: defaults[:value].deep_stringify_keys,
       is_system: true,
       is_public: defaults[:is_public] || false,
-      description: defaults[:description]
+      description: defaults[:description].to_s
     )
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error "Failed to seed setting #{key}: #{e.message}"
+    nil
   end
-
-  DEFAULTS = {
-    "site_info" => {
-      category: "general",
-      is_public: true,
-      description: "Basic site information",
-      value: {
-        "site_name" => "Vega Tools & Hardwares",
-        "tagline" => "Building your dreams with quality tools",
-        "description" => "Dindigul's #1 Tool Store - Authorized POLYMAK dealer",
-        "website" => "https://vegatoolsandhardwares.in/"
-      }
-    },
-    "contact_info" => {
-      category: "contact",
-      is_public: true,
-      description: "Contact details",
-      value: {
-        "phone" => "095007 16588",
-        "email" => "contact@vegatoolsandhardwares.in",
-        "website" => "https://vegatoolsandhardwares.in/",
-        "address" => "No. 583/4B, Dindigul - Trichy Bypass Road, Rajakkapatti, EB Colony, Dindigul District, Tamil Nadu 624004",
-        "google_maps_url" => "https://maps.app.goo.gl/eQ6RmoxqpgrFpksp7",
-        "store_hours" => "Monday - Saturday: 9 AM - 8 PM"
-      }
-    },
-    "hero_section" => {
-      category: "sections",
-      is_public: true,
-      description: "Hero section content",
-      value: {
-        "title_line1" => "Dindigul's #1 Tool Store",
-        "title_line2" => "Premium Tools, Trusted Service",
-        "subtitle" => "Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions"
-      }
-    },
-    "stats_section" => {
-      category: "sections",
-      is_public: true,
-      description: "Stats displayed on landing page",
-      value: {
-        "stat1" => { "number" => "4.8⭐", "label" => "Google Rating" },
-        "stat2" => { "number" => "500+", "label" => "Power Tools" },
-        "stat3" => { "number" => "100+", "label" => "Genuine Products" }
-      }
-    },
-    "about_section" => {
-      category: "sections",
-      is_public: true,
-      description: "About section content",
-      value: {
-        "title" => "About Vega Tools and Hardwares",
-        "paragraphs" => [
-          "Located on Trichy Road in Dindigul District, Tamil Nadu, Vega Tools and Hardwares is your trusted partner for professional power tools and safety equipment.",
-          "With a 4.8-star rating and hundreds of satisfied customers, we serve contractors, builders, and industrial clients across Dindigul and surrounding regions."
-        ],
-        "features" => [
-          "Authorized POLYMAK Dealer",
-          "Complete Safety Equipment",
-          "Professional Grade Tools",
-          "Expert Technical Support"
-        ]
-      }
-    },
-    "social_links" => {
-      category: "contact",
-      is_public: true,
-      description: "Social media links",
-      value: {
-        "whatsapp" => "https://wa.me/919500716588",
-        "instagram" => "",
-        "facebook" => ""
-      }
-    },
-    "theme_config" => {
-      category: "appearance",
-      is_public: true,
-      description: "Theme and appearance settings",
-      value: {
-        "primary_color" => "#f59e0b",
-        "secondary_color" => "#1e293b",
-        "font_family" => "Inter, system-ui, sans-serif"
-      }
-    }
-  }.freeze
 end

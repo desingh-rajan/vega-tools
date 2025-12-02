@@ -3,8 +3,8 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <div class="nav-logo">
-        <%= image_tag "vega-logo.png", alt: "Vega Tools and Hardwares", class: "logo-icon" %>
-        <span class="logo-text">VEGA TOOLS & HARDWARES</span>
+        <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+        <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
       </div>
       <ul class="nav-menu" id="navMenu">
         <li><a href="#home" class="nav-link">Home</a></li>
@@ -72,27 +72,33 @@
     </div>
     <div class="hero-content fade-in-up">
       <h1 class="hero-title">
-        <span class="title-line">Dindigul's #1 Tool Store</span>
-        <span class="title-line highlight">Premium Tools, Trusted Service</span>
+        <span class="title-line"><%= @hero_section["title_line1"] %></span>
+        <span class="title-line highlight"><%= @hero_section["title_line2"] %></span>
       </h1>
-      <p class="hero-subtitle">Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions | Your Trusted Partner for Quality Engineering Tools</p>
+      <p class="hero-subtitle"><%= @hero_section["subtitle"] %></p>
       <div class="hero-buttons">
         <a href="#products" class="btn btn-primary"> Explore Products</a>
         <a href="#location" class="btn btn-secondary"> Visit Our Store</a>
       </div>
       <div class="hero-stats">
+        <% if @stats_section["stat1"].present? %>
         <div class="stat-item">
-          <span class="stat-number">4.8⭐</span>
-          <span class="stat-label">Google Rating</span>
+          <span class="stat-number"><%= @stats_section.dig("stat1", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat1", "label") %></span>
         </div>
+        <% end %>
+        <% if @stats_section["stat2"].present? %>
         <div class="stat-item">
-          <span class="stat-number">500+</span>
-          <span class="stat-label">Power Tools</span>
+          <span class="stat-number"><%= @stats_section.dig("stat2", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat2", "label") %></span>
         </div>
+        <% end %>
+        <% if @stats_section["stat3"].present? %>
         <div class="stat-item">
-          <span class="stat-number">100+</span>
-          <span class="stat-label">Genuine Products</span>
+          <span class="stat-number"><%= @stats_section.dig("stat3", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat3", "label") %></span>
         </div>
+        <% end %>
       </div>
     </div>
     <div class="scroll-indicator">
@@ -146,35 +152,17 @@
   <section class="hero hero-3" id="about">
     <div class="about-container">
       <div class="about-content fade-in-left">
-        <h2 class="section-title">About Vega Tools and Hardwares</h2>
-        <p class="about-text">
-          Located on Trichy Road in Dindigul District, Tamil Nadu, Vega Tools and Hardwares is your trusted partner for 
-          professional power tools and safety equipment. We specialize in POLYMAK, FERM, TOSHAN, and other leading brands, 
-          providing construction professionals with high-quality angle grinders, core drills, welding machines, and complete 
-          safety gear including helmets, shoes, and protective equipment.
-        </p>
-        <p class="about-text">
-          With a 4.8-star rating and hundreds of satisfied customers, we serve contractors, builders, and industrial clients 
-          across Dindigul and surrounding regions. From 100mm angle grinders to professional welding equipment and precision 
-          measuring tools, we stock everything you need to complete your projects safely and efficiently.
-        </p>
+        <h2 class="section-title"><%= @about_section["title"] %></h2>
+        <% (@about_section["paragraphs"] || []).each do |paragraph| %>
+          <p class="about-text"><%= paragraph %></p>
+        <% end %>
         <div class="about-features">
+          <% (@about_section["features"] || []).each do |feature| %>
           <div class="feature-item">
             <span class="feature-icon">✓</span>
-            <span>Authorized POLYMAK Dealer</span>
+            <span><%= feature %></span>
           </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Complete Safety Equipment</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Professional Grade Tools</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Expert Technical Support</span>
-          </div>
+          <% end %>
         </div>
       </div>
       <div class="about-visual fade-in-right">
@@ -198,25 +186,28 @@
             <span class="info-icon">📍</span>
             <div class="info-details">
               <h4>Address</h4>
-              <p>No. 583/4B, Dindigul - Trichy Bypass Road</p>
-              <p>Rajakkapatti, EB Colony</p>
-              <p>Dindigul District, Tamil Nadu 624004</p>
+              <% address_lines = (@contact_info["address"] || "").split(",").map(&:strip) %>
+              <% address_lines.each do |line| %>
+                <p><%= line %></p>
+              <% end %>
             </div>
           </div>
           <div class="info-item">
             <span class="info-icon">⏰</span>
             <div class="info-details">
               <h4>Store Hours</h4>
-              <p>Opens 9 AM Wednesday</p>
-              <p>Monday - Saturday: 9 AM - 8 PM</p>
+              <p><%= @contact_info["store_hours"] %></p>
             </div>
           </div>
           <div class="info-item">
             <span class="info-icon">📞</span>
             <div class="info-details">
               <h4>Contact</h4>
-              <p>Phone: 095007 16588</p>
-              <p>Website: vegatoolsandhardwares.in</p>
+              <p>Phone: <%= @contact_info["phone"] %></p>
+              <% if @contact_info["email"].present? %>
+                <p>Email: <%= @contact_info["email"] %></p>
+              <% end %>
+              <p>Website: <%= @contact_info["website"]&.gsub(%r{^https?://}, '') %></p>
             </div>
           </div>
           <div class="info-item">
@@ -227,7 +218,7 @@
             </div>
           </div>
         </div>
-        <a href="https://maps.app.goo.gl/eQ6RmoxqpgrFpksp7" target="_blank" class="btn btn-primary">
+        <a href="<%= @contact_info["google_maps_url"] %>" target="_blank" class="btn btn-primary">
           Get Directions on Google Maps
         </a>
       </div>
@@ -239,9 +230,9 @@
     <div class="footer-container">
       <div class="footer-content">
         <div class="footer-brand">
-          <%= image_tag "vega-logo.png", alt: "Vega Tools", class: "footer-logo" %>
-          <h3>VEGA Tools and Hardwares</h3>
-          <p>Building your dreams with quality tools</p>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "footer-logo" %>
+          <h3><%= @site_info["site_name"] %></h3>
+          <p><%= @site_info["tagline"] %></p>
         </div>
         <div class="footer-links">
           <h4>Quick Links</h4>
@@ -254,13 +245,16 @@
         </div>
         <div class="footer-contact">
           <h4>Contact Info</h4>
-          <p>📞 095007 16588</p>
-          <p>🌐 vegatoolsandhardwares.in</p>
+          <p>📞 <%= @contact_info["phone"] %></p>
+          <p>🌐 <%= @contact_info["website"]&.gsub(%r{^https?://}, '') %></p>
           <p>📍 Dindigul District, Tamil Nadu</p>
+          <% if @social_links["whatsapp"].present? %>
+            <p><a href="<%= @social_links["whatsapp"] %>" target="_blank" class="social-link">💬 WhatsApp</a></p>
+          <% end %>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 Vega Tools and Hardwares. All rights reserved.</p>
+        <p>&copy; <%= Date.current.year %> <%= @site_info["site_name"] %>. All rights reserved.</p>
       </div>
     </div>
   </section>

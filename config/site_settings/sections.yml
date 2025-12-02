@@ -1,0 +1,41 @@
+# Site Settings: Sections Category
+# These settings control individual page sections (hero, stats, about, etc.)
+
+hero_section:
+  category: sections
+  is_public: true
+  description: Hero section content (main banner)
+  value:
+    title_line1: "Dindigul's #1 Tool Store"
+    title_line2: "Premium Tools, Trusted Service"
+    subtitle: "Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions"
+
+stats_section:
+  category: sections
+  is_public: true
+  description: Stats displayed on landing page
+  value:
+    stat1:
+      number: "4.8⭐"
+      label: Google Rating
+    stat2:
+      number: "500+"
+      label: Power Tools
+    stat3:
+      number: "100+"
+      label: Genuine Products
+
+about_section:
+  category: sections
+  is_public: true
+  description: About section content
+  value:
+    title: About Vega Tools and Hardwares
+    paragraphs:
+      - "Located on Trichy Road in Dindigul District, Tamil Nadu, Vega Tools and Hardwares is your trusted partner for professional power tools and safety equipment."
+      - "With a 4.8-star rating and hundreds of satisfied customers, we serve contractors, builders, and industrial clients across Dindigul and surrounding regions."
+    features:
+      - Authorized POLYMAK Dealer
+      - Complete Safety Equipment
+      - Professional Grade Tools
+      - Expert Technical Support
