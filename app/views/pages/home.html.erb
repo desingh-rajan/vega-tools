@@ -177,8 +177,8 @@
                 <%= link_to product_path(product.slug), class: "product-card-link" do %>
                   <div class="product-card">
                     <div class="product-image">
-                      <% if product.images.attached? %>
-                        <%= image_tag product.images.first.variant(resize_to_fill: [280, 280]), alt: product.name %>
+                      <% if product.images.attached? && product.images.first.present? %>
+                        <%= image_tag url_for(product.images.first), alt: product.name %>
                       <% else %>
                         <div class="no-image">
                           <span>📦</span>
@@ -189,7 +189,7 @@
                       <% end %>
                     </div>
                     <div class="product-info">
-                      <h4 class="product-name"><%= truncate(product.name, length: 40) %></h4>
+                      <h4 class="product-name"><%= truncate(product.name, length: 35) %></h4>
                       <p class="product-brand"><%= product.brand %></p>
                       <div class="product-price">
                         <% if product.on_sale? %>
