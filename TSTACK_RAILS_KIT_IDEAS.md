@@ -425,6 +425,363 @@ end
 
 ---
 
+## 🎨 JSON Editor for ActiveAdmin (Dual Interface)
+
+> **Problem:** JSONB columns in ActiveAdmin show ugly raw JSON that non-technical users can't edit.
+> **Solution:** Custom Formtastic input with tabs - "Form View" for users, "JSON View" for developers.
+
+### 1. Custom Input Class
+
+```ruby
+# app/inputs/json_editor_input.rb
+# frozen_string_literal: true
+
+class JsonEditorInput < Formtastic::Inputs::TextInput
+  def to_html
+    input_wrapping do
+      json_value = object.send(method)
+      json_string = json_value.is_a?(String) ? json_value : JSON.pretty_generate(json_value || {})
+      editor_id = "json_editor_#{object.class.name.underscore}_#{method}_#{object.id || 'new'}"
+
+      template.content_tag(:div, class: "json-editor-container", id: editor_id) do
+        template.concat(render_tabs(editor_id))
+        template.concat(render_json_view(editor_id, json_string))
+        template.concat(render_form_view(editor_id, json_value))
+        template.concat(render_hidden_field)
+        template.concat(render_javascript(editor_id, json_value))
+      end
+    end
+  end
+
+  private
+
+  def render_tabs(editor_id)
+    template.content_tag(:div, class: "json-editor-tabs") do
+      template.content_tag(:button, "📝 Form View", type: "button", 
+        class: "json-tab active", data: { target: "form", editor: editor_id }) +
+      template.content_tag(:button, "{ } JSON View", type: "button", 
+        class: "json-tab", data: { target: "json", editor: editor_id })
+    end
+  end
+
+  def render_json_view(editor_id, json_string)
+    template.content_tag(:div, class: "json-view", id: "#{editor_id}_json", style: "display: none;") do
+      template.content_tag(:textarea, json_string, class: "json-textarea", rows: 15) +
+      template.content_tag(:p, "Edit JSON directly. Changes sync automatically.", class: "json-hint")
+    end
+  end
+
+  def render_form_view(editor_id, json_value)
+    template.content_tag(:div, class: "form-view", id: "#{editor_id}_form") do
+      render_hash_fields(json_value, "", editor_id) if json_value.is_a?(Hash)
+    end
+  end
+
+  def render_hash_fields(hash, prefix, editor_id)
+    template.content_tag(:div, class: "json-form-fields") do
+      hash.map { |key, value| render_field(key, value, prefix.empty? ? key : "#{prefix}.#{key}", editor_id) }.join.html_safe
+    end
+  end
+
+  def render_field(key, value, field_path, editor_id)
+    label_text = key.to_s.humanize.titleize
+    
+    template.content_tag(:div, class: "json-field") do
+      case value
+      when Hash
+        template.content_tag(:fieldset, class: "json-nested") do
+          template.content_tag(:legend, label_text) + render_hash_fields(value, field_path, editor_id)
+        end
+      when Array
+        if value.all? { |v| v.is_a?(String) }
+          template.content_tag(:label, label_text) +
+          template.content_tag(:textarea, value.join("\n"),
+            class: "json-field-input json-array-input",
+            data: { path: field_path, type: "array", editor: editor_id },
+            placeholder: "One item per line", rows: [value.length + 1, 3].max) +
+          template.content_tag(:span, "One item per line", class: "json-field-hint")
+        else
+          template.content_tag(:label, label_text) +
+          template.content_tag(:pre, JSON.pretty_generate(value), class: "json-preview")
+        end
+      when TrueClass, FalseClass
+        template.content_tag(:label, class: "json-checkbox-label") do
+          template.check_box_tag("#{editor_id}_#{field_path}", "1", value,
+            class: "json-field-input", data: { path: field_path, type: "boolean", editor: editor_id }) +
+          " #{label_text}"
+        end
+      else
+        is_long = value.to_s.length > 100 || value.to_s.include?("\n")
+        template.content_tag(:label, label_text) +
+        (is_long ? 
+          template.content_tag(:textarea, value.to_s, class: "json-field-input",
+            data: { path: field_path, type: "string", editor: editor_id }, rows: 3) :
+          template.text_field_tag("#{editor_id}_#{field_path}", value.to_s, class: "json-field-input",
+            data: { path: field_path, type: "string", editor: editor_id }))
+      end
+    end
+  end
+
+  def render_hidden_field
+    template.hidden_field_tag(
+      input_html_options[:name] || "#{object.class.name.underscore}[#{method}]", "",
+      class: "json-hidden-field"
+    )
+  end
+
+  def render_javascript(editor_id, json_value)
+    template.content_tag(:script, <<~JS.html_safe)
+      (function() {
+        const container = document.getElementById('#{editor_id}');
+        if (!container) return;
+        
+        const jsonTextarea = container.querySelector('.json-textarea');
+        const hiddenField = container.querySelector('.json-hidden-field');
+        const formView = document.getElementById('#{editor_id}_form');
+        const jsonView = document.getElementById('#{editor_id}_json');
+        const tabs = container.querySelectorAll('.json-tab');
+        
+        let currentJson = #{(json_value || {}).to_json};
+        hiddenField.value = JSON.stringify(currentJson, null, 2);
+        
+        // Tab switching
+        tabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            const target = this.dataset.target;
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (target === 'json') {
+              formView.style.display = 'none';
+              jsonView.style.display = 'block';
+              jsonTextarea.value = JSON.stringify(currentJson, null, 2);
+            } else {
+              try {
+                currentJson = JSON.parse(jsonTextarea.value);
+                jsonView.style.display = 'none';
+                formView.style.display = 'block';
+                syncJsonToForm();
+              } catch(e) {
+                alert('Invalid JSON. Please fix before switching.');
+              }
+            }
+          });
+        });
+        
+        // JSON textarea changes
+        jsonTextarea.addEventListener('input', function() {
+          try {
+            currentJson = JSON.parse(this.value);
+            hiddenField.value = this.value;
+            this.classList.remove('json-error');
+          } catch(e) { this.classList.add('json-error'); }
+        });
+        
+        // Form field changes
+        container.querySelectorAll('.json-field-input').forEach(input => {
+          ['input', 'change'].forEach(evt => {
+            input.addEventListener(evt, function() {
+              const path = this.dataset.path;
+              const type = this.dataset.type;
+              let value = type === 'boolean' ? this.checked :
+                          type === 'number' ? parseFloat(this.value) || 0 :
+                          type === 'array' ? this.value.split('\\n').filter(s => s.trim()) :
+                          this.value;
+              setNestedValue(currentJson, path, value);
+              hiddenField.value = JSON.stringify(currentJson, null, 2);
+            });
+          });
+        });
+        
+        function setNestedValue(obj, path, value) {
+          const keys = path.split('.');
+          let current = obj;
+          for (let i = 0; i < keys.length - 1; i++) {
+            current[keys[i]] = current[keys[i]] || {};
+            current = current[keys[i]];
+          }
+          current[keys[keys.length - 1]] = value;
+        }
+        
+        function syncJsonToForm() {
+          container.querySelectorAll('.json-field-input').forEach(input => {
+            const path = input.dataset.path;
+            const type = input.dataset.type;
+            const value = path.split('.').reduce((o, k) => o?.[k], currentJson);
+            if (type === 'boolean') input.checked = !!value;
+            else if (type === 'array') input.value = Array.isArray(value) ? value.join('\\n') : '';
+            else input.value = value ?? '';
+          });
+        }
+      })();
+    JS
+  end
+end
+```
+
+### 2. CSS Styling (add to active_admin_overrides.css)
+
+```css
+/* JSON Editor - Dual Interface */
+.json-editor-container {
+  border: 1px solid #c5e0bb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.json-editor-tabs {
+  display: flex;
+  background: #e3f2de;
+  border-bottom: 1px solid #c5e0bb;
+}
+
+.json-tab {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d6635;
+}
+
+.json-tab.active {
+  background: #fff;
+  border-bottom: 2px solid #6cc24a;
+}
+
+.json-textarea {
+  width: 100%;
+  min-height: 300px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  padding: 16px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  background: #f7fbf5;
+}
+
+.json-textarea.json-error {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.json-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.json-field > label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #2d5025;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.json-field-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.json-nested {
+  border: 1px solid #d4e8cf;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f9fcf8;
+}
+
+.json-nested legend {
+  font-weight: 600;
+  color: #3d6635;
+  padding: 0 8px;
+}
+```
+
+### 3. Usage in ActiveAdmin
+
+```ruby
+# app/admin/site_settings.rb
+ActiveAdmin.register SiteSetting do
+  form do |f|
+    f.inputs "Value" do
+      value = f.object.value
+      if value.is_a?(Hash) || value.is_a?(Array)
+        f.input :value, as: :json_editor  # <-- Magic!
+      else
+        f.input :value, as: :string
+      end
+    end
+    f.actions
+  end
+
+  # Controller to parse JSON on save
+  controller do
+    def update
+      @record = SiteSetting.find(params[:id])
+      value_param = params[:site_setting][:value]
+      
+      if value_param.strip.start_with?("{", "[")
+        @record.value = JSON.parse(value_param)
+      else
+        @record.value = value_param
+      end
+      
+      if @record.save
+        redirect_to admin_site_setting_path(@record), notice: "Updated!"
+      else
+        render :edit
+      end
+    rescue JSON::ParserError => e
+      @record.errors.add(:value, "Invalid JSON: #{e.message}")
+      render :edit
+    end
+  end
+end
+```
+
+### 4. Pretty Display in Index/Show Pages
+
+```ruby
+# In index or show blocks
+column :value do |setting|
+  value = setting.value
+  case value
+  when Hash
+    div class: "json-key-value-display" do
+      value.each do |k, v|
+        div class: "json-kv-row" do
+          span k.to_s.humanize.titleize, class: "json-kv-key"
+          span v.to_s, class: "json-kv-value"
+        end
+      end
+    end
+  when Array
+    pre JSON.pretty_generate(value)
+  else
+    value.to_s
+  end
+end
+```
+
+### Key Benefits
+
+1. **Non-technical users** see friendly form fields with labels
+2. **Developers** can switch to JSON view for complex edits
+3. **Bi-directional sync** - changes in one view update the other
+4. **Validation** - JSON errors highlighted before save
+5. **Nested objects** rendered as fieldsets
+6. **Arrays of strings** rendered as textarea (one per line)
+
+---
+
 ## 🔐 Active Admin with User Model
 
 ### Configuration
