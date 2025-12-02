@@ -2,52 +2,42 @@ Rails.application.routes.draw do
   ActiveAdmin.routes(self)
   devise_for :users
 
-  # API Routes for Flutter app
-  namespace :api do
-    namespace :v1 do
-      # Categories
-      resources :categories, only: [ :index, :show ] do
-        member do
-          get :products
-        end
-        collection do
-          get :tree
-          get :featured
-        end
-      end
+  # ==========================================================================
+  # UNIFIED ROUTES - Serve both HTML (web) and JSON (API/Flutter)
+  # Use `respond_to` in controllers to handle format
+  # No API versioning complexity - keep it simple!
+  # ==========================================================================
 
-      # Products
-      resources :products, only: [ :index, :show ] do
-        collection do
-          get :search
-          get :featured
-          get :on_sale
-          get :brands
-          get "by_slug/:slug", to: "products#by_slug", as: :by_slug
-        end
-      end
-
-      # Site Settings
-      resources :site_settings, only: [ :index ], param: :key do
-        collection do
-          get :homepage
-          get :app_config
-        end
-      end
-      get "site_settings/:key", to: "site_settings#show", as: :site_setting
+  # Products Catalog
+  resources :products, only: [ :index, :show ], param: :slug do
+    collection do
+      get :search
+      get :featured
+      get :brands
     end
   end
 
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # Categories with nested products
+  resources :categories, only: [ :index, :show ], param: :slug do
+    member do
+      get :products  # GET /categories/:slug/products
+    end
+    collection do
+      get :tree      # GET /categories/tree (hierarchical)
+      get :featured  # GET /categories/featured
+    end
+  end
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Site Settings (public, read-only)
+  resources :site_settings, only: [ :index, :show ], param: :key do
+    collection do
+      get :homepage   # GET /site_settings/homepage (all homepage settings)
+    end
+  end
+
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
+  # Root
   root "pages#home"
 end

@@ -1,0 +1,187 @@
+<div class="product-detail-page">
+  <!-- Navbar - Matching Landing Page -->
+  <nav class="catalog-navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <%= link_to root_path, class: "logo-link" do %>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+          <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
+        <% end %>
+      </div>
+      
+      <ul class="nav-menu">
+        <li><%= link_to "Home", root_path, class: "nav-link" %></li>
+        <li><%= link_to "Products", products_path, class: "nav-link active" %></li>
+        <li><%= link_to "Categories", categories_path, class: "nav-link" %></li>
+        <li><a href="<%= root_path %>#contact" class="nav-link cta-button">Contact Us</a></li>
+      </ul>
+      
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" style="margin-top: 65px;">
+    <div class="breadcrumbs-container">
+      <%= link_to "Home", root_path %>
+      <span class="separator">›</span>
+      <%= link_to "Products", products_path %>
+      <% if @product.category %>
+        <span class="separator">›</span>
+        <%= link_to @product.category.name, category_path(@product.category.slug) %>
+      <% end %>
+      <span class="separator">›</span>
+      <span class="current"><%= truncate(@product.name, length: 40) %></span>
+    </div>
+  </nav>
+
+  <!-- Product Detail -->
+  <main class="product-detail" style="margin-top: 0;">
+    <div class="product-detail-container">
+      <!-- Product Images -->
+      <div class="product-gallery">
+        <div class="main-image">
+          <% if @product.images.attached? %>
+            <% begin %>
+              <%= image_tag @product.images.first.variant(resize_to_limit: [600, 600]), 
+                  alt: @product.name, 
+                  id: "mainProductImage",
+                  class: "zoomable" %>
+            <% rescue %>
+              <div class="no-image-large">
+                <span>📦</span>
+                <p>Image unavailable</p>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="no-image-large">
+              <span>📦</span>
+              <p>No image available</p>
+            </div>
+          <% end %>
+          <% if @product.on_sale? %>
+            <span class="sale-badge-large">-<%= @product.discount_percentage %>% OFF</span>
+          <% end %>
+        </div>
+        
+        <% if @product.images.attached? && @product.images.count > 1 %>
+          <div class="thumbnail-gallery">
+            <% @product.images.each_with_index do |image, index| %>
+              <% begin %>
+                <button class="thumbnail <%= 'active' if index == 0 %>" 
+                        data-image="<%= url_for(image.variant(resize_to_limit: [600, 600])) %>">
+                  <%= image_tag image.variant(resize_to_fill: [80, 80]), alt: "#{@product.name} - Image #{index + 1}" %>
+                </button>
+              <% rescue %>
+                <!-- Thumbnail unavailable -->
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info-detail">
+        <% if @product.category %>
+          <span class="product-category-badge">
+            <%= @product.category.icon %> <%= @product.category.name %>
+          </span>
+        <% end %>
+        
+        <h1 class="product-title"><%= @product.name %></h1>
+        
+        <% if @product.brand.present? %>
+          <p class="product-brand-detail">Brand: <strong><%= @product.brand %></strong></p>
+        <% end %>
+        
+        <p class="product-sku">SKU: <%= @product.sku %></p>
+
+        <div class="product-pricing">
+          <% if @product.on_sale? %>
+            <div class="price-sale">
+              <span class="original-price">₹<%= number_with_delimiter(@product.price.to_i) %></span>
+              <span class="sale-price">₹<%= number_with_delimiter(@product.discounted_price.to_i) %></span>
+              <span class="discount-badge">Save <%= @product.discount_percentage %>%</span>
+            </div>
+          <% else %>
+            <span class="current-price">₹<%= number_with_delimiter(@product.price.to_i) %></span>
+          <% end %>
+        </div>
+
+        <% if @product.description.present? %>
+          <div class="product-description">
+            <h3>📝 Description</h3>
+            <div class="description-content">
+              <%= simple_format(@product.description) %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @product.specifications.present? && @product.specifications.is_a?(Hash) && @product.specifications.keys.any? %>
+          <div class="product-specifications">
+            <h3>📋 Specifications</h3>
+            <table class="specs-table">
+              <% @product.specifications.each do |key, value| %>
+                <tr>
+                  <th><%= key.to_s.humanize %></th>
+                  <td><%= value %></td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        <% end %>
+
+        <!-- Contact CTA -->
+        <div class="product-cta">
+          <a href="<%= @social_links["whatsapp"] %>?text=Hi! I'm interested in: <%= @product.name %> (SKU: <%= @product.sku %>)" 
+             target="_blank" 
+             class="btn btn-whatsapp">
+            💬 Enquire on WhatsApp
+          </a>
+          <a href="tel:<%= @contact_info["phone"]&.gsub(/\s/, '') %>" class="btn btn-phone">
+            📞 Call Now
+          </a>
+        </div>
+
+        <div class="store-info">
+          <p>📍 Available at our store</p>
+          <p><strong><%= @site_info["site_name"] %></strong></p>
+          <p><%= @contact_info["address"] %></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Related Products -->
+  <% if @related_products.any? %>
+    <section class="related-products">
+      <div class="section-container">
+        <h2>Related Products</h2>
+        <div class="products-grid">
+          <% @related_products.each do |product| %>
+            <%= render partial: "products/product_card", locals: { product: product } %>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- Footer -->
+  <%= render partial: "shared/catalog_footer" %>
+</div>
+
+<script>
+  // Thumbnail gallery
+  document.querySelectorAll('.thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      const mainImg = document.getElementById('mainProductImage');
+      if (mainImg) mainImg.src = thumb.dataset.image;
+    });
+  });
+</script>

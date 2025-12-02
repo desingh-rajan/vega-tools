@@ -9,6 +9,42 @@ hero_section:
     title_line1: "Dindigul's #1 Tool Store"
     title_line2: "Premium Tools, Trusted Service"
     subtitle: "Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions"
+    cta_primary_text: "Explore Products"
+    cta_primary_link: "#products"
+    cta_secondary_text: "Visit Our Store"
+    cta_secondary_link: "#location"
+
+hero_carousel:
+  category: sections
+  is_public: true
+  description: Hero carousel configuration (images and settings)
+  value:
+    enabled: true
+    auto_play: true
+    interval_ms: 5000
+    show_arrows: true
+    show_dots: true
+    show_progress: true
+    slides:
+      - type: background
+        title: "Quality Tools"
+        description: "Premium hardware for professionals"
+        background_style: "gradient"
+      - type: image
+        title: "Power Tools"
+        description: "Professional grade equipment"
+        image_url: ""
+        alt_text: "Power tools collection"
+      - type: image
+        title: "Safety Equipment"
+        description: "Complete safety solutions"
+        image_url: ""
+        alt_text: "Safety equipment display"
+      - type: image
+        title: "Hand Tools"
+        description: "Precision instruments"
+        image_url: ""
+        alt_text: "Hand tools selection"
 
 stats_section:
   category: sections

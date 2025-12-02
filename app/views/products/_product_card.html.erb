@@ -1,0 +1,36 @@
+<%= link_to product_path(product.slug), class: "product-card" do %>
+  <div class="product-image">
+    <% if product.images.attached? && product.images.first.blob.present? %>
+      <% begin %>
+        <%= image_tag url_for(product.images.first), alt: product.name, loading: "lazy" %>
+      <% rescue => e %>
+        <div class="no-image">
+          <span>📦</span>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="no-image">
+        <span>📦</span>
+      </div>
+    <% end %>
+    <% if product.on_sale? %>
+      <span class="sale-badge">-<%= product.discount_percentage %>%</span>
+    <% end %>
+    <div class="product-overlay">
+      <span class="view-details">View Details</span>
+    </div>
+  </div>
+  <div class="product-info">
+    <span class="product-category"><%= product.category&.name || "Uncategorized" %></span>
+    <h3 class="product-name"><%= truncate(product.name, length: 45) %></h3>
+    <p class="product-brand"><%= product.brand %></p>
+    <div class="product-price">
+      <% if product.on_sale? %>
+        <span class="original-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+        <span class="sale-price">₹<%= number_with_delimiter(product.discounted_price.to_i) %></span>
+      <% else %>
+        <span class="current-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

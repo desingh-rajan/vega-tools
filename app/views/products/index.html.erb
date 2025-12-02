@@ -1,0 +1,161 @@
+<div class="catalog-page">
+  <!-- Sticky Navigation Bar - Matching Landing Page -->
+  <nav class="navbar catalog-navbar" id="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <%= link_to root_path, class: "logo-link" do %>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+          <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
+        <% end %>
+      </div>
+      
+      <!-- Integrated Search Bar -->
+      <div class="nav-search">
+        <%= form_tag products_path, method: :get, class: "search-form" do %>
+          <%= hidden_field_tag :category, params[:category] if params[:category] %>
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <%= text_field_tag :q, params[:q], placeholder: "Search products...", class: "search-input", autocomplete: "off" %>
+            <% if params[:q].present? %>
+              <%= link_to "✕", products_path(category: params[:category]), class: "clear-search" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><%= link_to "Home", root_path, class: "nav-link" %></li>
+        <li><%= link_to "Products", products_path, class: "nav-link active" %></li>
+        <li><%= link_to "Categories", categories_path, class: "nav-link" %></li>
+        <li><a href="<%= root_path %>#contact" class="nav-link cta-button">Contact Us</a></li>
+      </ul>
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Category Filter Pills - Below Navbar -->
+  <section class="category-filters">
+    <div class="filters-container">
+      <div class="filter-pills">
+        <%= link_to "All Products", products_path, class: "filter-pill #{params[:category].blank? && params[:brand].blank? ? 'active' : ''}" %>
+        <% @categories.limit(8).each do |category| %>
+          <%= link_to category.name, products_path(category: category.slug), 
+              class: "filter-pill #{params[:category] == category.slug ? 'active' : ''}" %>
+        <% end %>
+        <% if @categories.count > 8 %>
+          <%= link_to "More...", categories_path, class: "filter-pill" %>
+        <% end %>
+      </div>
+      
+      <% if @brands.any? %>
+        <div class="brand-filter">
+          <%= form_tag products_path, method: :get, class: "brand-form" do %>
+            <%= hidden_field_tag :category, params[:category] if params[:category] %>
+            <%= hidden_field_tag :q, params[:q] if params[:q] %>
+            <%= select_tag :brand, 
+                options_for_select([["All Brands", ""]] + @brands.map { |b| [b, b] }, params[:brand]),
+                onchange: "this.form.submit()",
+                class: "brand-select" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="catalog-content">
+    <% if params[:q].present? || params[:category].present? || params[:brand].present? %>
+      <!-- Filtered Results -->
+      <section class="filtered-results">
+        <div class="results-header">
+          <h1>
+            <% if params[:q].present? %>
+              🔍 Results for "<%= params[:q] %>"
+            <% elsif @category %>
+              <%= @category.icon %> <%= @category.name %>
+            <% elsif params[:brand].present? %>
+              🏭 <%= params[:brand] %>
+            <% end %>
+          </h1>
+          <span class="results-count"><%= @products.count %> products found</span>
+        </div>
+        
+        <% if @products.any? %>
+          <div class="products-grid">
+            <% @products.each do |product| %>
+              <%= render partial: "products/product_card", locals: { product: product } %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="no-results">
+            <span class="emoji">🔍</span>
+            <h3>No products found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+            <%= link_to "View All Products", products_path, class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </section>
+    <% else %>
+      <!-- Netflix-style Category Rows -->
+      <% if @products_by_category.any? %>
+        <% @products_by_category.each do |category, products| %>
+          <section class="category-row">
+            <div class="row-header">
+              <h2>
+                <span class="category-icon"><%= category.icon %></span>
+                <%= category.name %>
+              </h2>
+              <%= link_to "View All →", category_path(category.slug), class: "view-all-link" %>
+            </div>
+            <div class="products-scroll-container">
+              <button class="scroll-btn scroll-left" aria-label="Scroll left">‹</button>
+              <div class="products-scroll">
+                <% products.each do |product| %>
+                  <%= render partial: "products/product_card", locals: { product: product } %>
+                <% end %>
+              </div>
+              <button class="scroll-btn scroll-right" aria-label="Scroll right">›</button>
+            </div>
+          </section>
+        <% end %>
+      <% else %>
+        <div class="no-results">
+          <span class="emoji">📦</span>
+          <h3>No products available yet</h3>
+          <p>Check back soon for our latest tools and equipment</p>
+        </div>
+      <% end %>
+    <% end %>
+  </main>
+
+  <!-- Footer -->
+  <%= render partial: "shared/catalog_footer" %>
+</div>
+
+<script>
+  // Horizontal scroll buttons
+  document.querySelectorAll('.products-scroll-container').forEach(container => {
+    const scrollEl = container.querySelector('.products-scroll');
+    const leftBtn = container.querySelector('.scroll-left');
+    const rightBtn = container.querySelector('.scroll-right');
+    
+    if (leftBtn && rightBtn && scrollEl) {
+      leftBtn.addEventListener('click', () => scrollEl.scrollBy({ left: -300, behavior: 'smooth' }));
+      rightBtn.addEventListener('click', () => scrollEl.scrollBy({ left: 300, behavior: 'smooth' }));
+    }
+  });
+
+  // Mobile hamburger menu
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.getElementById('navMenu');
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    });
+  }
+</script>

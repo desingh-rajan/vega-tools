@@ -8,7 +8,7 @@
       </div>
       <ul class="nav-menu" id="navMenu">
         <li><a href="#home" class="nav-link">Home</a></li>
-        <li><a href="#products" class="nav-link">Products</a></li>
+        <li><%= link_to "Products", products_path, class: "nav-link" %></li>
         <li><a href="#about" class="nav-link">About</a></li>
         <li><a href="#location" class="nav-link">Location</a></li>
         <li><a href="#contact" class="nav-link cta-button">Contact Us</a></li>
@@ -23,50 +23,91 @@
 
   <!-- Hero Section 1 -->
   <section class="hero hero-1" id="home">
-    <!-- Image Carousel Background -->
-    <div class="hero-carousel" data-controller="carousel">
-      <div class="carousel-slide active"></div>
-      <div class="carousel-slide"></div>
-      <div class="carousel-slide"></div>
-      <div class="carousel-slide"></div>
-      
-      <!-- Carousel Navigation Arrows -->
-      <button class="carousel-arrow prev" data-action="carousel#prev" aria-label="Previous slide">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button class="carousel-arrow next" data-action="carousel#next" aria-label="Next slide">
-        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-      </button>
-      
-      <!-- Carousel Dots -->
-      <div class="carousel-dots">
-        <button class="carousel-dot active" data-action="carousel#goToSlide" data-index="0" aria-label="Go to slide 1"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="1" aria-label="Go to slide 2"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="2" aria-label="Go to slide 3"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="3" aria-label="Go to slide 4"></button>
+    <%# Hero Carousel - Configurable from Site Settings %>
+    <% carousel_config = @hero_carousel || {} %>
+    <% slides = carousel_config["slides"] || [] %>
+    <% show_arrows = carousel_config["show_arrows"] != false %>
+    <% show_dots = carousel_config["show_dots"] != false %>
+    <% show_progress = carousel_config["show_progress"] != false %>
+    <% interval = carousel_config["interval_ms"] || 5000 %>
+    
+    <div class="hero-carousel" 
+         data-controller="carousel" 
+         data-carousel-interval-value="<%= interval %>">
+      <%# First slide is always the animated background %>
+      <div class="carousel-slide active" data-slide-type="background">
+        <div class="slide-background animated-bg"></div>
       </div>
       
-      <!-- Progress Bar -->
-      <div class="carousel-progress"></div>
+      <%# Additional slides from configuration %>
+      <% slides.each_with_index do |slide, index| %>
+        <% next if index == 0 && slide["type"] == "background" %>
+        <div class="carousel-slide" data-slide-type="<%= slide["type"] || 'pattern' %>">
+          <% if slide["image_url"].present? %>
+            <div class="slide-background" style="background-image: url('<%= slide["image_url"] %>');"></div>
+          <% else %>
+            <div class="slide-background pattern-bg pattern-<%= index % 4 %>"></div>
+          <% end %>
+          <% if slide["title"].present? || slide["description"].present? %>
+            <div class="slide-overlay">
+              <% if slide["title"].present? %>
+                <h3 class="slide-title"><%= slide["title"] %></h3>
+              <% end %>
+              <% if slide["description"].present? %>
+                <p class="slide-description"><%= slide["description"] %></p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% total_slides = 1 + slides.count { |s| s["type"] != "background" || slides.index(s) != 0 } %>
+      
+      <% if show_arrows && total_slides > 1 %>
+        <!-- Carousel Navigation Arrows -->
+        <button class="carousel-arrow prev" data-action="carousel#prev" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button class="carousel-arrow next" data-action="carousel#next" aria-label="Next slide">
+          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+        </button>
+      <% end %>
+      
+      <% if show_dots && total_slides > 1 %>
+        <!-- Carousel Dots -->
+        <div class="carousel-dots">
+          <% total_slides.times do |i| %>
+            <button class="carousel-dot <%= 'active' if i == 0 %>" 
+                    data-action="carousel#goToSlide" 
+                    data-index="<%= i %>" 
+                    aria-label="Go to slide <%= i + 1 %>"></button>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% if show_progress && total_slides > 1 %>
+        <!-- Progress Bar -->
+        <div class="carousel-progress" style="--carousel-interval: <%= interval %>ms;"></div>
+      <% end %>
     </div>
     
     <div class="hero-background">
       <div class="animated-grid"></div>
       <div class="floating-tools">
-  <div class="tool-icon" aria-label="Safety helmet">⛑️</div>
-  <div class="tool-icon" aria-label="Toolbox">🧰</div>
-  <div class="tool-icon" aria-label="Power saw">🪚</div>
-  <div class="tool-icon" aria-label="Fastener">🔩</div>
-  <div class="tool-icon" aria-label="Power tool">⚡</div>
-  <div class="tool-icon" aria-label="Screwdriver">🪛</div>
-  <div class="tool-icon" aria-label="Measuring tape">📏</div>
-  <div class="tool-icon" aria-label="Adjustable wrench">🔧</div>
-  <div class="tool-icon" aria-label="Breaker hammer">⚒️</div>
-  <div class="tool-icon" aria-label="Workshop tools">🛠️</div>
-  <div class="tool-icon" aria-label="Clamp">🗜️</div>
-  <div class="tool-icon" aria-label="Angle ruler">📐</div>
-  <div class="tool-icon" aria-label="Ladder">🪜</div>
-  <div class="tool-icon" aria-label="Safety shield">🛡️</div>
+        <div class="tool-icon" aria-label="Safety helmet">⛑️</div>
+        <div class="tool-icon" aria-label="Toolbox">🧰</div>
+        <div class="tool-icon" aria-label="Power saw">🪚</div>
+        <div class="tool-icon" aria-label="Fastener">🔩</div>
+        <div class="tool-icon" aria-label="Power tool">⚡</div>
+        <div class="tool-icon" aria-label="Screwdriver">🪛</div>
+        <div class="tool-icon" aria-label="Measuring tape">📏</div>
+        <div class="tool-icon" aria-label="Adjustable wrench">🔧</div>
+        <div class="tool-icon" aria-label="Breaker hammer">⚒️</div>
+        <div class="tool-icon" aria-label="Workshop tools">🛠️</div>
+        <div class="tool-icon" aria-label="Clamp">🗜️</div>
+        <div class="tool-icon" aria-label="Angle ruler">📐</div>
+        <div class="tool-icon" aria-label="Ladder">🪜</div>
+        <div class="tool-icon" aria-label="Safety shield">🛡️</div>
       </div>
       <div class="particles"></div>
     </div>
@@ -77,8 +118,12 @@
       </h1>
       <p class="hero-subtitle"><%= @hero_section["subtitle"] %></p>
       <div class="hero-buttons">
-        <a href="#products" class="btn btn-primary"> Explore Products</a>
-        <a href="#location" class="btn btn-secondary"> Visit Our Store</a>
+        <a href="<%= @hero_section["cta_primary_link"] || '#products' %>" class="btn btn-primary">
+          🛒 <%= @hero_section["cta_primary_text"] || "Explore Products" %>
+        </a>
+        <a href="<%= @hero_section["cta_secondary_link"] || '#location' %>" class="btn btn-secondary">
+          📍 <%= @hero_section["cta_secondary_text"] || "Visit Our Store" %>
+        </a>
       </div>
       <div class="hero-stats">
         <% if @stats_section["stat1"].present? %>
@@ -111,41 +156,98 @@
   <!-- Hero Section 2 - Products Showcase -->
   <section class="hero hero-2" id="products">
     <div class="section-header fade-in-up">
-      <h2 class="section-title">Our Product Range</h2>
-      <p class="section-subtitle">Quality tools for every project</p>
+      <h2 class="section-title"><%= @products_section["title"] || "Our Product Range" %></h2>
+      <p class="section-subtitle"><%= @products_section["subtitle"] || "Quality tools for every project" %></p>
     </div>
-    <div class="products-grid">
-      <div class="product-card slide-in-left">
-        <div class="product-icon">⚡</div>
-        <h3>Angle Grinders & Power Tools</h3>
-        <p>POLYMAK & FERM angle grinders (100mm-180mm), demolition hammers, marble cutters - professional grade power equipment</p>
+
+    <% if @featured_categories.present? %>
+      <!-- Netflix-style Category Rows with Products -->
+      <div class="category-showcase">
+        <% @featured_categories.each do |featured| %>
+          <div class="category-row fade-in-up">
+            <div class="category-row-header">
+              <div class="category-info">
+                <span class="category-icon"><%= featured[:category].icon %></span>
+                <h3 class="category-title"><%= featured[:title] %></h3>
+              </div>
+              <%= link_to "View All →", category_path(featured[:category].slug), class: "view-all-link" %>
+            </div>
+            <div class="products-scroll">
+              <% featured[:products].each do |product| %>
+                <%= link_to product_path(product.slug), class: "product-card-link" do %>
+                  <div class="product-card">
+                    <div class="product-image">
+                      <% if product.images.attached? %>
+                        <%= image_tag product.images.first.variant(resize_to_fill: [280, 280]), alt: product.name %>
+                      <% else %>
+                        <div class="no-image">
+                          <span>📦</span>
+                        </div>
+                      <% end %>
+                      <% if product.on_sale? %>
+                        <span class="sale-badge">-<%= product.discount_percentage %>%</span>
+                      <% end %>
+                    </div>
+                    <div class="product-info">
+                      <h4 class="product-name"><%= truncate(product.name, length: 40) %></h4>
+                      <p class="product-brand"><%= product.brand %></p>
+                      <div class="product-price">
+                        <% if product.on_sale? %>
+                          <span class="original-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+                          <span class="sale-price">₹<%= number_with_delimiter(product.discounted_price.to_i) %></span>
+                        <% else %>
+                          <span class="current-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
-      <div class="product-card slide-in-up">
-        <div class="product-icon">🔋</div>
-        <h3>Cordless Tools</h3>
-        <p>12V & 18V battery-powered drills, impact drivers and impact wrenches for maximum portability</p>
+
+      <div class="view-all-products">
+        <%= link_to products_path, class: "btn btn-primary btn-large" do %>
+          🛒 <%= @products_section["view_all_text"] || "View All Products" %>
+        <% end %>
       </div>
-      <div class="product-card slide-in-right">
-        <div class="product-icon">⚙️</div>
-        <h3>Core Drilling Machines</h3>
-        <p>Professional core drills including KBM 38, MG-40-O models for concrete and masonry work</p>
+    <% else %>
+      <!-- Fallback: Static Product Categories Grid -->
+      <div class="products-grid">
+        <div class="product-card slide-in-left">
+          <div class="product-icon">⚡</div>
+          <h3>Angle Grinders & Power Tools</h3>
+          <p>POLYMAK & FERM angle grinders (100mm-180mm), demolition hammers, marble cutters - professional grade power equipment</p>
+        </div>
+        <div class="product-card slide-in-up">
+          <div class="product-icon">🔋</div>
+          <h3>Cordless Tools</h3>
+          <p>12V & 18V battery-powered drills, impact drivers and impact wrenches for maximum portability</p>
+        </div>
+        <div class="product-card slide-in-right">
+          <div class="product-icon">⚙️</div>
+          <h3>Core Drilling Machines</h3>
+          <p>Professional core drills including KBM 38, MG-40-O models for concrete and masonry work</p>
+        </div>
+        <div class="product-card slide-in-left">
+          <div class="product-icon">🔥</div>
+          <h3>Welding Equipment</h3>
+          <p>TOSHAN ARC-400 IGBT & MOS welding machines, injection mortars and welding accessories</p>
+        </div>
+        <div class="product-card slide-in-up">
+          <div class="product-icon">📏</div>
+          <h3>Measuring Instruments</h3>
+          <p>Laser distance meters (100M range), spirit levels with magnets, professional measuring tapes</p>
+        </div>
+        <div class="product-card slide-in-right">
+          <div class="product-icon">🦺</div>
+          <h3>Safety Equipment</h3>
+          <p>Safety helmets, shoes (Hillson, ALKO brands), gloves, belts, reflective jackets - complete PPE range</p>
+        </div>
       </div>
-      <div class="product-card slide-in-left">
-        <div class="product-icon">�</div>
-        <h3>Welding Equipment</h3>
-        <p>TOSHAN ARC-400 IGBT & MOS welding machines, injection mortars and welding accessories</p>
-      </div>
-      <div class="product-card slide-in-up">
-        <div class="product-icon">📏</div>
-        <h3>Measuring Instruments</h3>
-        <p>Laser distance meters (100M range), spirit levels with magnets, professional measuring tapes</p>
-      </div>
-      <div class="product-card slide-in-right">
-        <div class="product-icon">🦺</div>
-        <h3>Safety Equipment</h3>
-        <p>Safety helmets, shoes (Hillson, ALKO brands), gloves, belts, reflective jackets - complete PPE range</p>
-      </div>
-    </div>
+    <% end %>
   </section>
 
   <!-- Hero Section 3 - About -->

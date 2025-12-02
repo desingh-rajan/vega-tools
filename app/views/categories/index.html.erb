@@ -1,0 +1,83 @@
+<div class="catalog-page">
+  <!-- Navbar - Matching Landing Page -->
+  <nav class="catalog-navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <%= link_to root_path, class: "logo-link" do %>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+          <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
+        <% end %>
+      </div>
+      
+      <ul class="nav-menu">
+        <li><%= link_to "Home", root_path, class: "nav-link" %></li>
+        <li><%= link_to "Products", products_path, class: "nav-link" %></li>
+        <li><%= link_to "Categories", categories_path, class: "nav-link active" %></li>
+        <li><a href="<%= root_path %>#contact" class="nav-link cta-button">Contact Us</a></li>
+      </ul>
+      
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="category-hero">
+    <h1>📂 Product Categories</h1>
+    <p>Browse our complete range of tools and equipment organized by category</p>
+    <div class="category-stats">
+      <span><%= @categories.count %> categories</span>
+      <span>•</span>
+      <span><%= Product.published.count %> products</span>
+    </div>
+  </section>
+
+  <!-- Categories Grid -->
+  <main class="catalog-content" style="padding-top: 2rem;">
+    <div class="categories-grid-page">
+      <% @categories.each do |category| %>
+        <%= link_to category_path(category.slug), class: "category-card-large" do %>
+          <div class="category-card-icon">
+            <% if category.icon_image.attached? %>
+              <% begin %>
+                <%= image_tag category.icon_image.variant(resize_to_fill: [120, 120]), alt: category.name %>
+              <% rescue %>
+                <span class="icon-emoji"><%= category.icon.presence || "📦" %></span>
+              <% end %>
+            <% else %>
+              <span class="icon-emoji"><%= category.icon.presence || "📦" %></span>
+            <% end %>
+          </div>
+          <div class="category-card-info">
+            <h2><%= category.name %></h2>
+            <% if category.description.present? %>
+              <p class="category-description"><%= truncate(category.description, length: 100) %></p>
+            <% end %>
+            <div class="category-meta">
+              <span class="product-count"><%= category.products.published.count %> products</span>
+              <% if category.children.any? %>
+                <span class="subcategory-count"><%= category.children.count %> subcategories</span>
+              <% end %>
+            </div>
+          </div>
+          <span class="category-arrow">→</span>
+        <% end %>
+      <% end %>
+    </div>
+    
+    <% if @categories.empty? %>
+      <div class="no-results">
+        <span class="emoji">📂</span>
+        <h3>No categories yet</h3>
+        <p>Check back soon for our product categories</p>
+        <%= link_to "Browse All Products", products_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </main>
+
+  <!-- Footer -->
+  <%= render partial: "shared/catalog_footer" %>
+</div>

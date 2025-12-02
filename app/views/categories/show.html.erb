@@ -1,0 +1,113 @@
+<div class="catalog-page">
+  <!-- Navbar - Matching Landing Page -->
+  <nav class="catalog-navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <%= link_to root_path, class: "logo-link" do %>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+          <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
+        <% end %>
+      </div>
+      
+      <ul class="nav-menu">
+        <li><%= link_to "Home", root_path, class: "nav-link" %></li>
+        <li><%= link_to "Products", products_path, class: "nav-link" %></li>
+        <li><%= link_to "Categories", categories_path, class: "nav-link active" %></li>
+        <li><a href="<%= root_path %>#contact" class="nav-link cta-button">Contact Us</a></li>
+      </ul>
+      
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" style="margin-top: 65px;">
+    <div class="breadcrumbs-container">
+      <%= link_to "Home", root_path %>
+      <span class="separator">›</span>
+      <%= link_to "Categories", categories_path %>
+      <% @breadcrumbs.each do |crumb| %>
+        <span class="separator">›</span>
+        <% if crumb == @category %>
+          <span class="current"><%= crumb.name %></span>
+        <% else %>
+          <%= link_to crumb.name, category_path(crumb.slug) %>
+        <% end %>
+      <% end %>
+    </div>
+  </nav>
+
+  <!-- Category Hero -->
+  <section class="category-hero" style="margin-top: 0;">
+    <div class="category-icon-large">
+      <% if @category.icon_image.attached? %>
+        <% begin %>
+          <%= image_tag @category.icon_image.variant(resize_to_fill: [100, 100]), alt: @category.name %>
+        <% rescue %>
+          <span><%= @category.icon.presence || "📦" %></span>
+        <% end %>
+      <% else %>
+        <span><%= @category.icon.presence || "📦" %></span>
+      <% end %>
+    </div>
+    <h1><%= @category.name %></h1>
+    <% if @category.description.present? %>
+      <p><%= @category.description %></p>
+    <% end %>
+    <div class="category-stats">
+      <span><%= @products.count %> products</span>
+      <% if @subcategories.any? %>
+        <span>•</span>
+        <span><%= @subcategories.count %> subcategories</span>
+      <% end %>
+    </div>
+  </section>
+
+  <main class="catalog-content" style="padding-top: 2rem;">
+    <!-- Subcategories -->
+    <% if @subcategories.any? %>
+      <section class="subcategories-section">
+        <h2>📁 Subcategories</h2>
+        <div class="subcategories-grid">
+          <% @subcategories.each do |sub| %>
+            <%= link_to category_path(sub.slug), class: "subcategory-card" do %>
+              <span class="sub-icon"><%= sub.icon.presence || "📁" %></span>
+              <span class="sub-name"><%= sub.name %></span>
+              <span class="sub-count"><%= sub.products.published.count %></span>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <!-- Products -->
+    <section class="category-products">
+      <div class="results-header">
+        <h1>Products in <%= @category.name %></h1>
+        <span class="results-count"><%= @products.count %> products</span>
+      </div>
+      
+      <% if @products.any? %>
+        <div class="products-grid">
+          <% @products.each do |product| %>
+            <%= render partial: "products/product_card", locals: { product: product } %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="no-results">
+          <span class="emoji">📦</span>
+          <h3>No products in this category yet</h3>
+          <p>Check back soon or browse other categories</p>
+          <%= link_to "Browse All Products", products_path, class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <%= render partial: "shared/catalog_footer" %>
+</div>
