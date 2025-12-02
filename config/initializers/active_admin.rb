@@ -233,6 +233,9 @@ ActiveAdmin.setup do |config|
   # To load a javascript file:
   #   config.register_javascript 'my_javascript.js'
 
+  # Custom ActiveAdmin overrides (font sizes, colors, etc.)
+  config.register_stylesheet "active_admin_overrides.css"
+
   # == CSV options
   #
   # Set the CSV builder separator
