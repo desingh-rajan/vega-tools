@@ -453,3 +453,248 @@ form.formtastic select:focus {
 #footer a {
   color: #3d6635;
 }
+
+/* ============================================
+   JSON EDITOR - Dual Interface Component
+   ============================================ */
+
+.json-editor-container {
+  border: 1px solid #c5e0bb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Tabs */
+.json-editor-tabs {
+  display: flex;
+  background: #e3f2de;
+  border-bottom: 1px solid #c5e0bb;
+}
+
+.json-tab {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d6635;
+  transition: all 0.2s ease;
+}
+
+.json-tab:hover {
+  background: #d4e8cf;
+}
+
+.json-tab.active {
+  background: #fff;
+  color: #2d5025;
+  border-bottom: 2px solid #6cc24a;
+}
+
+/* JSON View */
+.json-view {
+  padding: 16px;
+}
+
+.json-textarea {
+  width: 100%;
+  min-height: 300px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  background: #f7fbf5;
+  color: #2d5025;
+  resize: vertical;
+}
+
+.json-textarea:focus {
+  outline: none;
+  border-color: #6cc24a;
+  box-shadow: 0 0 0 3px rgba(108, 194, 74, 0.15);
+}
+
+.json-textarea.json-error {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.json-hint {
+  font-size: 12px;
+  color: #6b8e63;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Form View */
+.form-view {
+  padding: 20px;
+}
+
+.json-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.json-form-fields.depth-1 {
+  padding-left: 0;
+}
+
+.json-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.json-field > label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #2d5025;
+}
+
+.json-field-input {
+  padding: 10px 12px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.json-field-input:focus {
+  outline: none;
+  border-color: #6cc24a;
+  box-shadow: 0 0 0 3px rgba(108, 194, 74, 0.15);
+}
+
+.json-field-input:hover {
+  border-color: #9cd18f;
+}
+
+textarea.json-field-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.json-array-input {
+  font-family: inherit;
+}
+
+.json-field-hint {
+  font-size: 11px;
+  color: #8aab82;
+}
+
+/* Nested fieldsets */
+.json-nested {
+  border: 1px solid #d4e8cf;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  background: #f9fcf8;
+}
+
+.json-nested legend {
+  font-weight: 600;
+  font-size: 14px;
+  color: #3d6635;
+  padding: 0 8px;
+  background: #f9fcf8;
+}
+
+/* Checkbox styling */
+.json-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.json-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #6cc24a;
+  cursor: pointer;
+}
+
+/* JSON preview for complex arrays */
+.json-preview {
+  background: #f7fbf5;
+  border: 1px solid #d4e8cf;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  overflow: auto;
+  max-height: 150px;
+}
+
+/* Pretty JSON display in index/show pages */
+.json-display {
+  background: #f7fbf5;
+  border: 1px solid #d4e8cf;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.json-display .json-key {
+  color: #3d6635;
+  font-weight: 600;
+}
+
+.json-display .json-string {
+  color: #0d6efd;
+}
+
+.json-display .json-number {
+  color: #d63384;
+}
+
+.json-display .json-boolean {
+  color: #6f42c1;
+}
+
+/* Key-value display for simple view */
+.json-key-value-display {
+  display: grid;
+  gap: 8px;
+}
+
+.json-kv-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f9fcf8;
+  border-radius: 6px;
+  border-left: 3px solid #6cc24a;
+}
+
+.json-kv-key {
+  font-weight: 600;
+  color: #3d6635;
+  font-size: 13px;
+}
+
+.json-kv-value {
+  color: #2d5025;
+  word-break: break-word;
+}
+
+.json-kv-nested {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 2px solid #d4e8cf;
+}

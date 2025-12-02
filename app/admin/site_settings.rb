@@ -10,7 +10,7 @@ ActiveAdmin.register SiteSetting do
   filter :key, as: :select, collection: -> { SiteSetting.all.pluck(:key).sort }
   filter :updated_at
 
-  # Index page - show as key-value pairs
+  # Index page - show as key-value pairs with pretty display
   index do
     column :key do |setting|
       code setting.key
@@ -19,7 +19,9 @@ ActiveAdmin.register SiteSetting do
       value = setting.value
       case value
       when Hash, Array
-        pre JSON.pretty_generate(value), style: "max-height: 150px; overflow: auto; font-size: 11px;"
+        div class: "json-display", style: "max-height: 150px;" do
+          pre JSON.pretty_generate(value), style: "margin: 0; font-size: 11px;"
+        end
       when TrueClass, FalseClass
         status_tag value ? "Yes" : "No", class: value ? "yes" : "no"
       else
@@ -34,7 +36,7 @@ ActiveAdmin.register SiteSetting do
     actions
   end
 
-  # Show page
+  # Show page with pretty JSON display
   show do
     attributes_table do
       row :key do |setting|
@@ -46,9 +48,30 @@ ActiveAdmin.register SiteSetting do
       end
       row :value do |setting|
         value = setting.value
-        case value
-        when Hash, Array
-          pre JSON.pretty_generate(value), style: "max-width: 100%; overflow: auto;"
+        if value.is_a?(Hash)
+          div class: "json-key-value-display" do
+            value.each do |k, v|
+              div class: "json-kv-row" do
+                span k.to_s.humanize.titleize, class: "json-kv-key"
+                if v.is_a?(Hash)
+                  div class: "json-kv-nested" do
+                    v.each do |k2, v2|
+                      div class: "json-kv-row", style: "margin-left: 20px;" do
+                        span k2.to_s.humanize.titleize, class: "json-kv-key"
+                        span v2.to_s, class: "json-kv-value"
+                      end
+                    end
+                  end
+                elsif v.is_a?(Array)
+                  span v.join(", "), class: "json-kv-value"
+                else
+                  span v.to_s, class: "json-kv-value"
+                end
+              end
+            end
+          end
+        elsif value.is_a?(Array)
+          pre JSON.pretty_generate(value)
         else
           value.to_s
         end
@@ -56,12 +79,7 @@ ActiveAdmin.register SiteSetting do
       row :default_value do |setting|
         default = SiteSetting::DEFAULTS[setting.key]&.dig("value")
         if default
-          case default
-          when Hash, Array
-            pre JSON.pretty_generate(default), style: "max-width: 100%; overflow: auto; background: #f5f5f5;"
-          else
-            default.to_s
-          end
+          pre JSON.pretty_generate(default), style: "background: #f5f5f5; padding: 10px; border-radius: 4px;"
         else
           "-"
         end
@@ -71,7 +89,7 @@ ActiveAdmin.register SiteSetting do
     end
   end
 
-  # Form
+  # Form with dual JSON/Form interface
   form do |f|
     default = SiteSetting::DEFAULTS[f.object.key]
 
@@ -85,16 +103,11 @@ ActiveAdmin.register SiteSetting do
     end
 
     f.inputs "Value" do
-      # Determine value type from defaults or current value
       value = f.object.value
       is_json = value.is_a?(Hash) || value.is_a?(Array)
 
       if is_json
-        f.input :value, as: :text, input_html: {
-          rows: 15,
-          value: JSON.pretty_generate(value),
-          class: "json-editor"
-        }, hint: "Edit JSON carefully. Invalid JSON will cause errors."
+        f.input :value, as: :json_editor
       elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
         f.input :value, as: :boolean
       else
