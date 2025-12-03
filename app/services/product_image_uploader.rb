@@ -18,7 +18,11 @@ class ProductImageUploader
 
   def initialize(product)
     @product = product
-    @s3_client = Aws::S3::Client.new(region: s3_region)
+    @s3_client = Aws::S3::Client.new(
+      region: s3_region,
+      access_key_id: Rails.application.credentials.dig(:aws, :access_key_id),
+      secret_access_key: Rails.application.credentials.dig(:aws, :secret_access_key)
+    )
     @bucket = s3_bucket
     @prefix = s3_prefix
   end
