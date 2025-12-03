@@ -1,0 +1,217 @@
+/* Devise Authentication Styles */
+
+.devise-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 1rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.devise-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.devise-logo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.devise-logo img {
+  height: 60px;
+  width: auto;
+}
+
+.devise-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-top: 0.5rem;
+}
+
+.devise-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.devise-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.devise-form .field {
+  margin-bottom: 1.25rem;
+}
+
+.devise-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.devise-form input[type="email"],
+.devise-form input[type="password"],
+.devise-form input[type="text"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.devise-form input[type="email"]:focus,
+.devise-form input[type="password"]:focus,
+.devise-form input[type="text"]:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.devise-form .remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.devise-form .remember-me input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f59e0b;
+  cursor: pointer;
+}
+
+.devise-form .remember-me label {
+  margin-bottom: 0;
+  font-weight: 400;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.devise-form .actions {
+  margin-top: 1.5rem;
+}
+
+.devise-form input[type="submit"] {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.devise-form input[type="submit"]:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.devise-form input[type="submit"]:active {
+  transform: translateY(0);
+}
+
+.devise-links {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.devise-links a {
+  display: inline-block;
+  color: #f59e0b;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.25rem 0;
+  transition: color 0.2s ease;
+}
+
+.devise-links a:hover {
+  color: #d97706;
+  text-decoration: underline;
+}
+
+.devise-error-messages {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.devise-error-messages h3 {
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.devise-error-messages ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.devise-error-messages li {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.devise-flash {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.devise-flash.notice {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.devise-flash.alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+/* Password hint */
+.devise-form .password-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .devise-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .devise-title {
+    font-size: 1.5rem;
+  }
+}

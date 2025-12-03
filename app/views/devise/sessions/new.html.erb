@@ -1,0 +1,52 @@
+<div class="devise-container">
+  <div class="devise-card">
+    <div class="devise-logo">
+      <%= image_tag "vega-logo.png", alt: "Vega Tools" %>
+      <div class="devise-logo-text">Vega Tools</div>
+    </div>
+
+    <h1 class="devise-title">Welcome Back</h1>
+    <p class="devise-subtitle">Sign in to access your account</p>
+
+    <% if flash[:notice] %>
+      <div class="devise-flash notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="devise-flash alert"><%= flash[:alert] %></div>
+    <% end %>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "devise-form" }) do |f| %>
+      <div class="field">
+        <%= f.label :email %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :password %>
+        <%= f.password_field :password, autocomplete: "current-password", placeholder: "Enter your password" %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="remember-me">
+          <%= f.check_box :remember_me, id: "remember_me" %>
+          <%= f.label :remember_me, "Keep me signed in" %>
+        </div>
+      <% end %>
+
+      <div class="actions">
+        <%= f.submit "Sign In" %>
+      </div>
+    <% end %>
+
+    <div class="devise-links">
+      <%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+        <%= link_to "Forgot your password?", new_password_path(resource_name) %>
+      <% end %>
+
+      <%- if devise_mapping.registerable? && controller_name != 'registrations' %>
+        <br>
+        <%= link_to "Don't have an account? Sign up", new_registration_path(resource_name) %>
+      <% end %>
+    </div>
+  </div>
+</div>

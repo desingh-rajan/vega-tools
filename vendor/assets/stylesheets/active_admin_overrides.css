@@ -1,0 +1,700 @@
+/* ActiveAdmin Custom Overrides
+ * This file is loaded after active_admin.css to customize the admin panel.
+ * Modify font sizes, colors, and other styles here.
+ */
+
+/* ============================================
+   TYPOGRAPHY - Font Sizes
+   ============================================ */
+
+/* Base font size for entire admin */
+body.active_admin {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Page titles */
+#page_title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Table content */
+.index_table td {
+  font-size: 0.9rem;
+  padding: 10px 8px;
+  line-height: 1.4;
+}
+
+.index_table th {
+  font-size: 0.8rem;
+  padding: 10px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.index_table th a {
+  font-size: 0.8rem;
+}
+
+/* Table row spacing */
+.index_table tr {
+  border-bottom: 1px solid #eee;
+}
+
+/* Form labels */
+form.formtastic li label {
+  font-size: 0.9rem;
+}
+
+/* Form inputs */
+form.formtastic input[type="text"],
+form.formtastic input[type="email"],
+form.formtastic input[type="password"],
+form.formtastic input[type="number"],
+form.formtastic textarea,
+form.formtastic select {
+  font-size: 0.9rem;
+  padding: 8px 10px;
+}
+
+/* Sidebar filters */
+#sidebar {
+  font-size: 0.85rem;
+}
+
+#sidebar label {
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+#sidebar input,
+#sidebar select {
+  font-size: 0.85rem;
+  padding: 6px 8px;
+}
+
+#sidebar h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Navigation menu */
+#header ul.tabs > li > a {
+  font-size: 0.9rem;
+  padding: 10px 14px;
+}
+
+#header h1 {
+  font-size: 1.2rem;
+}
+
+/* Site title */
+#header #site_title a {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.breadcrumb a, .breadcrumb span {
+  font-size: 0.8rem;
+}
+
+/* Flash messages */
+.flash {
+  font-size: 0.9rem;
+  padding: 12px 16px;
+}
+
+/* Buttons */
+a.button, input[type="submit"], button, .action_item a {
+  font-size: 0.85rem;
+  padding: 8px 14px;
+}
+
+/* Pagination */
+.pagination a, .pagination span {
+  font-size: 0.8rem;
+}
+
+/* Comments section */
+.active_admin_comment .active_admin_comment_body {
+  font-size: 0.9rem;
+}
+
+/* Panel headings */
+.panel h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Utility bar (current user, logout) */
+#utility_nav a {
+  font-size: 0.85rem;
+}
+
+/* Scopes (All, Published tabs) */
+.scopes .scope a {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+}
+
+/* Batch actions dropdown */
+.batch_actions_selector a {
+  font-size: 0.85rem;
+}
+
+/* Dropdown menus */
+#header ul.tabs li.has_nested > ul li a {
+  font-size: 0.85rem;
+}
+
+/* Status tags */
+.status_tag {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  font-weight: 500;
+}
+
+/* Quick Stats sidebar */
+#sidebar .sidebar_section li {
+  font-size: 0.85rem;
+  padding: 4px 0;
+}
+
+/* Product thumbnails in table */
+.index_table img {
+  border-radius: 4px;
+}
+
+/* ============================================
+   GREEN THEME - NO GREY ANYWHERE
+   ============================================ */
+
+/* Header bar - dark green instead of grey/black */
+#header {
+  background: linear-gradient(135deg, #1e3a1a 0%, #2d4a28 100%);
+}
+
+/* Active nav tab */
+#header ul.tabs > li.current > a {
+  background: #6cc24a;
+}
+
+#header ul.tabs > li > a:hover {
+  background: #4a9c2c;
+}
+
+/* Primary buttons */
+.action_item a,
+a.button,
+input[type="submit"],
+button.primary {
+  background: linear-gradient(135deg, #6cc24a 0%, #4a9c2c 100%);
+  border: none;
+  color: #fff;
+}
+
+.action_item a:hover,
+a.button:hover,
+input[type="submit"]:hover {
+  background: linear-gradient(135deg, #5db33d 0%, #3d8a24 100%);
+}
+
+/* Links */
+a {
+  color: #3d8a24;
+}
+
+a:hover {
+  color: #6cc24a;
+}
+
+/* Active scope tab */
+.scopes .scope.selected a {
+  background: #6cc24a;
+  color: #fff;
+}
+
+/* Filter button */
+#sidebar input[type="submit"] {
+  background: #6cc24a;
+  border: none;
+}
+
+#sidebar input[type="submit"]:hover {
+  background: #4a9c2c;
+}
+
+/* ============================================
+   ALL BACKGROUNDS - GREEN TINTS (NO GREY)
+   ============================================ */
+
+/* Main content area */
+#active_admin_content {
+  background: #f0f7ee;
+}
+
+/* Table header - darker green tint like the old grey */
+.index_table th {
+  background: #3d6635 !important;
+  color: #fff !important;
+  border-color: #2d5025 !important;
+}
+
+.index_table th a {
+  color: #fff !important;
+}
+
+.index_table th a:hover {
+  color: #d4f0cc !important;
+}
+
+/* Table borders */
+.index_table {
+  border: 1px solid #c5e0bb;
+}
+
+.index_table td {
+  border-color: #d4e8cf;
+}
+
+/* Table row spacing */
+.index_table tr {
+  border-bottom: 1px solid #d4e8cf;
+}
+
+/* Alternating table rows */
+.index_table tr.odd td {
+  background: #f7fbf5;
+}
+
+.index_table tr.even td {
+  background: #fff;
+}
+
+/* Table row hover */
+.index_table tr:hover td {
+  background: #e3f2de !important;
+}
+
+/* Sidebar */
+#sidebar {
+  background: #f0f7ee;
+}
+
+#sidebar .sidebar_section {
+  background: #fff;
+  border: 1px solid #c5e0bb;
+}
+
+#sidebar .sidebar_section h3 {
+  background: #3d6635;
+  color: #fff;
+  border-bottom: 1px solid #2d5025;
+}
+
+/* Sidebar inputs */
+#sidebar input[type="text"],
+#sidebar select {
+  border: 1px solid #c5e0bb;
+  background: #fff;
+}
+
+#sidebar input[type="text"]:focus,
+#sidebar select:focus {
+  border-color: #6cc24a;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(108, 194, 74, 0.2);
+}
+
+/* Panel headers */
+.panel h3 {
+  background: #3d6635;
+  color: #fff;
+  border-bottom: 1px solid #2d5025;
+}
+
+.panel {
+  border: 1px solid #c5e0bb;
+  background: #fff;
+}
+
+/* Attributes table (show page) */
+.attributes_table {
+  border: 1px solid #c5e0bb;
+}
+
+.attributes_table th {
+  background: #e3f2de;
+  color: #2d5025;
+  border-color: #c5e0bb;
+}
+
+.attributes_table td {
+  background: #fff;
+  border-color: #d4e8cf;
+}
+
+/* Title bar area */
+#title_bar {
+  background: #e3f2de;
+  border-bottom: 1px solid #c5e0bb;
+}
+
+/* Breadcrumb area */
+.breadcrumb {
+  background: transparent;
+  color: #3d6635;
+}
+
+.breadcrumb a {
+  color: #3d6635;
+}
+
+/* Scopes bar */
+.scopes {
+  background: #e3f2de;
+  border-bottom: 1px solid #c5e0bb;
+}
+
+.scopes .scope a {
+  color: #3d6635;
+  border-color: #c5e0bb;
+}
+
+/* Batch actions */
+.batch_actions_selector {
+  background: #e3f2de;
+  border-color: #c5e0bb;
+}
+
+/* Pagination */
+.pagination a {
+  background: #e3f2de;
+  border-color: #c5e0bb;
+  color: #3d6635;
+}
+
+.pagination a:hover {
+  background: #d4e8cf;
+}
+
+.pagination .current {
+  background: #6cc24a;
+  border-color: #4a9c2c;
+  color: #fff;
+}
+
+/* Flash messages */
+.flash.flash_notice {
+  background: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.flash.flash_error,
+.flash.flash_alert {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Form elements */
+form.formtastic fieldset {
+  border-color: #c5e0bb;
+}
+
+form.formtastic input[type="text"],
+form.formtastic input[type="email"],
+form.formtastic input[type="password"],
+form.formtastic input[type="number"],
+form.formtastic textarea,
+form.formtastic select {
+  border: 1px solid #c5e0bb;
+}
+
+form.formtastic input:focus,
+form.formtastic textarea:focus,
+form.formtastic select:focus {
+  border-color: #6cc24a;
+  box-shadow: 0 0 0 2px rgba(108, 194, 74, 0.2);
+}
+
+/* Dropdown menus */
+#header ul.tabs li.has_nested > ul {
+  background: #2d4a28;
+  border-color: #1e3a1a;
+}
+
+#header ul.tabs li.has_nested > ul li a {
+  color: #fff;
+  border-color: #3d6635;
+}
+
+#header ul.tabs li.has_nested > ul li a:hover {
+  background: #4a9c2c;
+}
+
+/* Footer */
+#footer {
+  background: #e3f2de;
+  border-top: 1px solid #c5e0bb;
+  color: #3d6635;
+}
+
+#footer a {
+  color: #3d6635;
+}
+
+/* ============================================
+   JSON EDITOR - Dual Interface Component
+   ============================================ */
+
+.json-editor-container {
+  border: 1px solid #c5e0bb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Tabs */
+.json-editor-tabs {
+  display: flex;
+  background: #e3f2de;
+  border-bottom: 1px solid #c5e0bb;
+}
+
+.json-tab {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d6635;
+  transition: all 0.2s ease;
+}
+
+.json-tab:hover {
+  background: #d4e8cf;
+}
+
+.json-tab.active {
+  background: #fff;
+  color: #2d5025;
+  border-bottom: 2px solid #6cc24a;
+}
+
+/* JSON View */
+.json-view {
+  padding: 16px;
+}
+
+.json-textarea {
+  width: 100%;
+  min-height: 300px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  background: #f7fbf5;
+  color: #2d5025;
+  resize: vertical;
+}
+
+.json-textarea:focus {
+  outline: none;
+  border-color: #6cc24a;
+  box-shadow: 0 0 0 3px rgba(108, 194, 74, 0.15);
+}
+
+.json-textarea.json-error {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.json-hint {
+  font-size: 12px;
+  color: #6b8e63;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Form View */
+.form-view {
+  padding: 20px;
+}
+
+.json-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.json-form-fields.depth-1 {
+  padding-left: 0;
+}
+
+.json-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.json-field > label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #2d5025;
+}
+
+.json-field-input {
+  padding: 10px 12px;
+  border: 1px solid #c5e0bb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.json-field-input:focus {
+  outline: none;
+  border-color: #6cc24a;
+  box-shadow: 0 0 0 3px rgba(108, 194, 74, 0.15);
+}
+
+.json-field-input:hover {
+  border-color: #9cd18f;
+}
+
+textarea.json-field-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.json-array-input {
+  font-family: inherit;
+}
+
+.json-field-hint {
+  font-size: 11px;
+  color: #8aab82;
+}
+
+/* Nested fieldsets */
+.json-nested {
+  border: 1px solid #d4e8cf;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  background: #f9fcf8;
+}
+
+.json-nested legend {
+  font-weight: 600;
+  font-size: 14px;
+  color: #3d6635;
+  padding: 0 8px;
+  background: #f9fcf8;
+}
+
+/* Checkbox styling */
+.json-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.json-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #6cc24a;
+  cursor: pointer;
+}
+
+/* JSON preview for complex arrays */
+.json-preview {
+  background: #f7fbf5;
+  border: 1px solid #d4e8cf;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  overflow: auto;
+  max-height: 150px;
+}
+
+/* Pretty JSON display in index/show pages */
+.json-display {
+  background: #f7fbf5;
+  border: 1px solid #d4e8cf;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.json-display .json-key {
+  color: #3d6635;
+  font-weight: 600;
+}
+
+.json-display .json-string {
+  color: #0d6efd;
+}
+
+.json-display .json-number {
+  color: #d63384;
+}
+
+.json-display .json-boolean {
+  color: #6f42c1;
+}
+
+/* Key-value display for simple view */
+.json-key-value-display {
+  display: grid;
+  gap: 8px;
+}
+
+.json-kv-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f9fcf8;
+  border-radius: 6px;
+  border-left: 3px solid #6cc24a;
+}
+
+.json-kv-key {
+  font-weight: 600;
+  color: #3d6635;
+  font-size: 13px;
+}
+
+.json-kv-value {
+  color: #2d5025;
+  word-break: break-word;
+}
+
+.json-kv-nested {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 2px solid #d4e8cf;
+}

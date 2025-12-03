@@ -3,12 +3,12 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <div class="nav-logo">
-        <%= image_tag "vega-logo.png", alt: "Vega Tools and Hardwares", class: "logo-icon" %>
-        <span class="logo-text">VEGA TOOLS & HARDWARES</span>
+        <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+        <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
       </div>
       <ul class="nav-menu" id="navMenu">
         <li><a href="#home" class="nav-link">Home</a></li>
-        <li><a href="#products" class="nav-link">Products</a></li>
+        <li><%= link_to "Products", products_path, class: "nav-link" %></li>
         <li><a href="#about" class="nav-link">About</a></li>
         <li><a href="#location" class="nav-link">Location</a></li>
         <li><a href="#contact" class="nav-link cta-button">Contact Us</a></li>
@@ -23,76 +23,127 @@
 
   <!-- Hero Section 1 -->
   <section class="hero hero-1" id="home">
-    <!-- Image Carousel Background -->
-    <div class="hero-carousel" data-controller="carousel">
-      <div class="carousel-slide active"></div>
-      <div class="carousel-slide"></div>
-      <div class="carousel-slide"></div>
-      <div class="carousel-slide"></div>
-      
-      <!-- Carousel Navigation Arrows -->
-      <button class="carousel-arrow prev" data-action="carousel#prev" aria-label="Previous slide">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button class="carousel-arrow next" data-action="carousel#next" aria-label="Next slide">
-        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
-      </button>
-      
-      <!-- Carousel Dots -->
-      <div class="carousel-dots">
-        <button class="carousel-dot active" data-action="carousel#goToSlide" data-index="0" aria-label="Go to slide 1"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="1" aria-label="Go to slide 2"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="2" aria-label="Go to slide 3"></button>
-        <button class="carousel-dot" data-action="carousel#goToSlide" data-index="3" aria-label="Go to slide 4"></button>
+    <%# Hero Carousel - Configurable from Site Settings %>
+    <% carousel_config = @hero_carousel || {} %>
+    <% slides = carousel_config["slides"] || [] %>
+    <% show_arrows = carousel_config["show_arrows"] != false %>
+    <% show_dots = carousel_config["show_dots"] != false %>
+    <% show_progress = carousel_config["show_progress"] != false %>
+    <% interval = carousel_config["interval_ms"] || 5000 %>
+    
+    <div class="hero-carousel" 
+         data-controller="carousel" 
+         data-carousel-interval-value="<%= interval %>">
+      <%# First slide is always the animated background %>
+      <div class="carousel-slide active" data-slide-type="background">
+        <div class="slide-background animated-bg"></div>
       </div>
       
-      <!-- Progress Bar -->
-      <div class="carousel-progress"></div>
+      <%# Additional slides from configuration %>
+      <% slides.each_with_index do |slide, index| %>
+        <% next if index == 0 && slide["type"] == "background" %>
+        <div class="carousel-slide" data-slide-type="<%= slide["type"] || 'pattern' %>">
+          <% if slide["image_url"].present? %>
+            <div class="slide-background" style="background-image: url('<%= slide["image_url"] %>');"></div>
+          <% else %>
+            <div class="slide-background pattern-bg pattern-<%= index % 4 %>"></div>
+          <% end %>
+          <% if slide["title"].present? || slide["description"].present? %>
+            <div class="slide-overlay">
+              <% if slide["title"].present? %>
+                <h3 class="slide-title"><%= slide["title"] %></h3>
+              <% end %>
+              <% if slide["description"].present? %>
+                <p class="slide-description"><%= slide["description"] %></p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% total_slides = 1 + slides.count { |s| s["type"] != "background" || slides.index(s) != 0 } %>
+      
+      <% if show_arrows && total_slides > 1 %>
+        <!-- Carousel Navigation Arrows -->
+        <button class="carousel-arrow prev" data-action="carousel#prev" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button class="carousel-arrow next" data-action="carousel#next" aria-label="Next slide">
+          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"></polyline></svg>
+        </button>
+      <% end %>
+      
+      <% if show_dots && total_slides > 1 %>
+        <!-- Carousel Dots -->
+        <div class="carousel-dots">
+          <% total_slides.times do |i| %>
+            <button class="carousel-dot <%= 'active' if i == 0 %>" 
+                    data-action="carousel#goToSlide" 
+                    data-index="<%= i %>" 
+                    aria-label="Go to slide <%= i + 1 %>"></button>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <% if show_progress && total_slides > 1 %>
+        <!-- Progress Bar -->
+        <div class="carousel-progress" style="--carousel-interval: <%= interval %>ms;"></div>
+      <% end %>
     </div>
     
     <div class="hero-background">
       <div class="animated-grid"></div>
       <div class="floating-tools">
-  <div class="tool-icon" aria-label="Safety helmet">⛑️</div>
-  <div class="tool-icon" aria-label="Toolbox">🧰</div>
-  <div class="tool-icon" aria-label="Power saw">🪚</div>
-  <div class="tool-icon" aria-label="Fastener">🔩</div>
-  <div class="tool-icon" aria-label="Power tool">⚡</div>
-  <div class="tool-icon" aria-label="Screwdriver">🪛</div>
-  <div class="tool-icon" aria-label="Measuring tape">📏</div>
-  <div class="tool-icon" aria-label="Adjustable wrench">🔧</div>
-  <div class="tool-icon" aria-label="Breaker hammer">⚒️</div>
-  <div class="tool-icon" aria-label="Workshop tools">🛠️</div>
-  <div class="tool-icon" aria-label="Clamp">🗜️</div>
-  <div class="tool-icon" aria-label="Angle ruler">📐</div>
-  <div class="tool-icon" aria-label="Ladder">🪜</div>
-  <div class="tool-icon" aria-label="Safety shield">🛡️</div>
+        <div class="tool-icon" aria-label="Safety helmet">⛑️</div>
+        <div class="tool-icon" aria-label="Toolbox">🧰</div>
+        <div class="tool-icon" aria-label="Power saw">🪚</div>
+        <div class="tool-icon" aria-label="Fastener">🔩</div>
+        <div class="tool-icon" aria-label="Power tool">⚡</div>
+        <div class="tool-icon" aria-label="Screwdriver">🪛</div>
+        <div class="tool-icon" aria-label="Measuring tape">📏</div>
+        <div class="tool-icon" aria-label="Adjustable wrench">🔧</div>
+        <div class="tool-icon" aria-label="Breaker hammer">⚒️</div>
+        <div class="tool-icon" aria-label="Workshop tools">🛠️</div>
+        <div class="tool-icon" aria-label="Clamp">🗜️</div>
+        <div class="tool-icon" aria-label="Angle ruler">📐</div>
+        <div class="tool-icon" aria-label="Ladder">🪜</div>
+        <div class="tool-icon" aria-label="Safety shield">🛡️</div>
       </div>
       <div class="particles"></div>
     </div>
     <div class="hero-content fade-in-up">
       <h1 class="hero-title">
-        <span class="title-line">Dindigul's #1 Tool Store</span>
-        <span class="title-line highlight">Premium Tools, Trusted Service</span>
+        <span class="title-line"><%= @hero_section["title_line1"] %></span>
+        <span class="title-line highlight"><%= @hero_section["title_line2"] %></span>
       </h1>
-      <p class="hero-subtitle">Authorized POLYMAK dealer in Dindigul | Professional power tools, precision hand tools & complete safety solutions | Your Trusted Partner for Quality Engineering Tools</p>
+      <p class="hero-subtitle"><%= @hero_section["subtitle"] %></p>
       <div class="hero-buttons">
-        <a href="#products" class="btn btn-primary"> Explore Products</a>
-        <a href="#location" class="btn btn-secondary"> Visit Our Store</a>
+        <a href="<%= @hero_section["cta_primary_link"] || '#products' %>" class="btn btn-primary">
+          🛒 <%= @hero_section["cta_primary_text"] || "Explore Products" %>
+        </a>
+        <a href="<%= @hero_section["cta_secondary_link"] || '#location' %>" class="btn btn-secondary">
+          📍 <%= @hero_section["cta_secondary_text"] || "Visit Our Store" %>
+        </a>
       </div>
       <div class="hero-stats">
+        <% if @stats_section["stat1"].present? %>
         <div class="stat-item">
-          <span class="stat-number">4.8⭐</span>
-          <span class="stat-label">Google Rating</span>
+          <span class="stat-number"><%= @stats_section.dig("stat1", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat1", "label") %></span>
         </div>
+        <% end %>
+        <% if @stats_section["stat2"].present? %>
         <div class="stat-item">
-          <span class="stat-number">500+</span>
-          <span class="stat-label">Power Tools</span>
+          <span class="stat-number"><%= @stats_section.dig("stat2", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat2", "label") %></span>
         </div>
+        <% end %>
+        <% if @stats_section["stat3"].present? %>
         <div class="stat-item">
-          <span class="stat-number">100+</span>
-          <span class="stat-label">Genuine Products</span>
+          <span class="stat-number"><%= @stats_section.dig("stat3", "number") %></span>
+          <span class="stat-label"><%= @stats_section.dig("stat3", "label") %></span>
         </div>
+        <% end %>
       </div>
     </div>
     <div class="scroll-indicator">
@@ -105,76 +156,115 @@
   <!-- Hero Section 2 - Products Showcase -->
   <section class="hero hero-2" id="products">
     <div class="section-header fade-in-up">
-      <h2 class="section-title">Our Product Range</h2>
-      <p class="section-subtitle">Quality tools for every project</p>
+      <h2 class="section-title"><%= @products_section["title"] || "Our Product Range" %></h2>
+      <p class="section-subtitle"><%= @products_section["subtitle"] || "Quality tools for every project" %></p>
     </div>
-    <div class="products-grid">
-      <div class="product-card slide-in-left">
-        <div class="product-icon">⚡</div>
-        <h3>Angle Grinders & Power Tools</h3>
-        <p>POLYMAK & FERM angle grinders (100mm-180mm), demolition hammers, marble cutters - professional grade power equipment</p>
+
+    <% if @featured_categories.present? %>
+      <!-- Netflix-style Category Rows with Products -->
+      <div class="category-showcase">
+        <% @featured_categories.each do |featured| %>
+          <div class="category-row fade-in-up">
+            <div class="category-row-header">
+              <div class="category-info">
+                <span class="category-icon"><%= featured[:category].icon %></span>
+                <h3 class="category-title"><%= featured[:title] %></h3>
+              </div>
+              <%= link_to "View All →", category_path(featured[:category].slug), class: "view-all-link" %>
+            </div>
+            <div class="products-scroll">
+              <% featured[:products].each do |product| %>
+                <%= link_to product_path(product.slug), class: "product-card-link" do %>
+                  <div class="product-card">
+                    <div class="product-image">
+                      <% if product.images.attached? && product.images.first.present? %>
+                        <%= image_tag url_for(product.images.first), alt: product.name %>
+                      <% else %>
+                        <div class="no-image">
+                          <span>📦</span>
+                        </div>
+                      <% end %>
+                      <% if product.on_sale? %>
+                        <span class="sale-badge">-<%= product.discount_percentage %>%</span>
+                      <% end %>
+                    </div>
+                    <div class="product-info">
+                      <h4 class="product-name"><%= truncate(product.name, length: 35) %></h4>
+                      <p class="product-brand"><%= product.brand %></p>
+                      <div class="product-price">
+                        <% if product.on_sale? %>
+                          <span class="original-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+                          <span class="sale-price">₹<%= number_with_delimiter(product.discounted_price.to_i) %></span>
+                        <% else %>
+                          <span class="current-price">₹<%= number_with_delimiter(product.price.to_i) %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
-      <div class="product-card slide-in-up">
-        <div class="product-icon">🔋</div>
-        <h3>Cordless Tools</h3>
-        <p>12V & 18V battery-powered drills, impact drivers and impact wrenches for maximum portability</p>
+
+      <div class="view-all-products">
+        <%= link_to products_path, class: "btn btn-primary btn-large" do %>
+          🛒 <%= @products_section["view_all_text"] || "View All Products" %>
+        <% end %>
       </div>
-      <div class="product-card slide-in-right">
-        <div class="product-icon">⚙️</div>
-        <h3>Core Drilling Machines</h3>
-        <p>Professional core drills including KBM 38, MG-40-O models for concrete and masonry work</p>
+    <% else %>
+      <!-- Fallback: Static Product Categories Grid -->
+      <div class="products-grid">
+        <div class="product-card slide-in-left">
+          <div class="product-icon">⚡</div>
+          <h3>Angle Grinders & Power Tools</h3>
+          <p>POLYMAK & FERM angle grinders (100mm-180mm), demolition hammers, marble cutters - professional grade power equipment</p>
+        </div>
+        <div class="product-card slide-in-up">
+          <div class="product-icon">🔋</div>
+          <h3>Cordless Tools</h3>
+          <p>12V & 18V battery-powered drills, impact drivers and impact wrenches for maximum portability</p>
+        </div>
+        <div class="product-card slide-in-right">
+          <div class="product-icon">⚙️</div>
+          <h3>Core Drilling Machines</h3>
+          <p>Professional core drills including KBM 38, MG-40-O models for concrete and masonry work</p>
+        </div>
+        <div class="product-card slide-in-left">
+          <div class="product-icon">🔥</div>
+          <h3>Welding Equipment</h3>
+          <p>TOSHAN ARC-400 IGBT & MOS welding machines, injection mortars and welding accessories</p>
+        </div>
+        <div class="product-card slide-in-up">
+          <div class="product-icon">📏</div>
+          <h3>Measuring Instruments</h3>
+          <p>Laser distance meters (100M range), spirit levels with magnets, professional measuring tapes</p>
+        </div>
+        <div class="product-card slide-in-right">
+          <div class="product-icon">🦺</div>
+          <h3>Safety Equipment</h3>
+          <p>Safety helmets, shoes (Hillson, ALKO brands), gloves, belts, reflective jackets - complete PPE range</p>
+        </div>
       </div>
-      <div class="product-card slide-in-left">
-        <div class="product-icon">�</div>
-        <h3>Welding Equipment</h3>
-        <p>TOSHAN ARC-400 IGBT & MOS welding machines, injection mortars and welding accessories</p>
-      </div>
-      <div class="product-card slide-in-up">
-        <div class="product-icon">📏</div>
-        <h3>Measuring Instruments</h3>
-        <p>Laser distance meters (100M range), spirit levels with magnets, professional measuring tapes</p>
-      </div>
-      <div class="product-card slide-in-right">
-        <div class="product-icon">🦺</div>
-        <h3>Safety Equipment</h3>
-        <p>Safety helmets, shoes (Hillson, ALKO brands), gloves, belts, reflective jackets - complete PPE range</p>
-      </div>
-    </div>
+    <% end %>
   </section>
 
   <!-- Hero Section 3 - About -->
   <section class="hero hero-3" id="about">
     <div class="about-container">
       <div class="about-content fade-in-left">
-        <h2 class="section-title">About Vega Tools and Hardwares</h2>
-        <p class="about-text">
-          Located on Trichy Road in Dindigul District, Tamil Nadu, Vega Tools and Hardwares is your trusted partner for 
-          professional power tools and safety equipment. We specialize in POLYMAK, FERM, TOSHAN, and other leading brands, 
-          providing construction professionals with high-quality angle grinders, core drills, welding machines, and complete 
-          safety gear including helmets, shoes, and protective equipment.
-        </p>
-        <p class="about-text">
-          With a 4.8-star rating and hundreds of satisfied customers, we serve contractors, builders, and industrial clients 
-          across Dindigul and surrounding regions. From 100mm angle grinders to professional welding equipment and precision 
-          measuring tools, we stock everything you need to complete your projects safely and efficiently.
-        </p>
+        <h2 class="section-title"><%= @about_section["title"] %></h2>
+        <% (@about_section["paragraphs"] || []).each do |paragraph| %>
+          <p class="about-text"><%= paragraph %></p>
+        <% end %>
         <div class="about-features">
+          <% (@about_section["features"] || []).each do |feature| %>
           <div class="feature-item">
             <span class="feature-icon">✓</span>
-            <span>Authorized POLYMAK Dealer</span>
+            <span><%= feature %></span>
           </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Complete Safety Equipment</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Professional Grade Tools</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">✓</span>
-            <span>Expert Technical Support</span>
-          </div>
+          <% end %>
         </div>
       </div>
       <div class="about-visual fade-in-right">
@@ -198,25 +288,28 @@
             <span class="info-icon">📍</span>
             <div class="info-details">
               <h4>Address</h4>
-              <p>No. 583/4B, Dindigul - Trichy Bypass Road</p>
-              <p>Rajakkapatti, EB Colony</p>
-              <p>Dindigul District, Tamil Nadu 624004</p>
+              <% address_lines = (@contact_info["address"] || "").split(",").map(&:strip) %>
+              <% address_lines.each do |line| %>
+                <p><%= line %></p>
+              <% end %>
             </div>
           </div>
           <div class="info-item">
             <span class="info-icon">⏰</span>
             <div class="info-details">
               <h4>Store Hours</h4>
-              <p>Opens 9 AM Wednesday</p>
-              <p>Monday - Saturday: 9 AM - 8 PM</p>
+              <p><%= @contact_info["store_hours"] %></p>
             </div>
           </div>
           <div class="info-item">
             <span class="info-icon">📞</span>
             <div class="info-details">
               <h4>Contact</h4>
-              <p>Phone: 095007 16588</p>
-              <p>Website: vegatoolsandhardwares.in</p>
+              <p>Phone: <%= @contact_info["phone"] %></p>
+              <% if @contact_info["email"].present? %>
+                <p>Email: <%= @contact_info["email"] %></p>
+              <% end %>
+              <p>Website: <%= @contact_info["website"]&.gsub(%r{^https?://}, '') %></p>
             </div>
           </div>
           <div class="info-item">
@@ -227,7 +320,7 @@
             </div>
           </div>
         </div>
-        <a href="https://maps.app.goo.gl/eQ6RmoxqpgrFpksp7" target="_blank" class="btn btn-primary">
+        <a href="<%= @contact_info["google_maps_url"] %>" target="_blank" class="btn btn-primary">
           Get Directions on Google Maps
         </a>
       </div>
@@ -239,9 +332,9 @@
     <div class="footer-container">
       <div class="footer-content">
         <div class="footer-brand">
-          <%= image_tag "vega-logo.png", alt: "Vega Tools", class: "footer-logo" %>
-          <h3>VEGA Tools and Hardwares</h3>
-          <p>Building your dreams with quality tools</p>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "footer-logo" %>
+          <h3><%= @site_info["site_name"] %></h3>
+          <p><%= @site_info["tagline"] %></p>
         </div>
         <div class="footer-links">
           <h4>Quick Links</h4>
@@ -254,13 +347,16 @@
         </div>
         <div class="footer-contact">
           <h4>Contact Info</h4>
-          <p>📞 095007 16588</p>
-          <p>🌐 vegatoolsandhardwares.in</p>
+          <p>📞 <%= @contact_info["phone"] %></p>
+          <p>🌐 <%= @contact_info["website"]&.gsub(%r{^https?://}, '') %></p>
           <p>📍 Dindigul District, Tamil Nadu</p>
+          <% if @social_links["whatsapp"].present? %>
+            <p><a href="<%= @social_links["whatsapp"] %>" target="_blank" class="social-link">💬 WhatsApp</a></p>
+          <% end %>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 Vega Tools and Hardwares. All rights reserved.</p>
+        <p>&copy; <%= Date.current.year %> <%= @site_info["site_name"] %>. All rights reserved.</p>
       </div>
     </div>
   </section>

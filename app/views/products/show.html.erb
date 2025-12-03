@@ -1,0 +1,188 @@
+<div class="product-page-light">
+  <!-- Navbar - Light theme matching landing page -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <%= link_to root_path, class: "logo-link" do %>
+          <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "logo-icon" %>
+          <span class="logo-text"><%= @site_info["site_name"]&.upcase %></span>
+        <% end %>
+      </div>
+      
+      <ul class="nav-menu" id="navMenu">
+        <li><%= link_to "Home", root_path, class: "nav-link" %></li>
+        <li><%= link_to "Products", products_path, class: "nav-link active" %></li>
+        <li><%= link_to "Categories", categories_path, class: "nav-link" %></li>
+        <li><a href="<%= root_path %>#contact" class="nav-link cta-button">Contact Us</a></li>
+      </ul>
+      
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumbs - Light theme -->
+  <nav class="breadcrumbs-light">
+    <div class="breadcrumbs-container">
+      <%= link_to "Home", root_path %>
+      <span class="separator">›</span>
+      <%= link_to "Products", products_path %>
+      <% if @product.category %>
+        <% # Show full category hierarchy (parent > child > grandchild) %>
+        <% @product.category.ancestors.reverse.each do |ancestor| %>
+          <span class="separator">›</span>
+          <%= link_to ancestor.name, category_path(ancestor.slug) %>
+        <% end %>
+        <span class="separator">›</span>
+        <%= link_to @product.category.name, category_path(@product.category.slug) %>
+      <% end %>
+      <span class="separator">›</span>
+      <span class="current"><%= truncate(@product.name, length: 40) %></span>
+    </div>
+  </nav>
+
+  <!-- Product Detail - Light theme -->
+  <main class="product-detail-light">
+    <div class="product-detail-container">
+      <!-- Product Images -->
+      <div class="product-gallery-light">
+        <div class="main-image-light">
+          <% if @product.images.attached? %>
+            <%= image_tag url_for(@product.images.first), 
+                alt: @product.name, 
+                id: "mainProductImage" %>
+          <% else %>
+            <div class="no-image-placeholder">
+              <span>📦</span>
+              <p>No image available</p>
+            </div>
+          <% end %>
+          <% if @product.on_sale? %>
+            <span class="sale-badge-large">-<%= @product.discount_percentage %>%</span>
+          <% end %>
+        </div>
+        
+        <% if @product.images.attached? && @product.images.count > 1 %>
+          <div class="thumbnail-gallery-light">
+            <% @product.images.each_with_index do |image, index| %>
+              <button class="thumbnail-light <%= 'active' if index == 0 %>" 
+                      data-image="<%= url_for(image) %>">
+                <%= image_tag url_for(image), alt: "#{@product.name} - Image #{index + 1}" %>
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info-light">
+        <% if @product.category %>
+          <span class="product-category-tag">
+            <%= @product.category.name %>
+          </span>
+        <% end %>
+        
+        <h1 class="product-title-light"><%= @product.name %></h1>
+        
+        <div class="product-meta-light">
+          <% if @product.brand.present? %>
+            <span class="brand">Brand: <strong><%= @product.brand %></strong></span>
+          <% end %>
+          <span class="sku">SKU: <%= @product.sku %></span>
+        </div>
+
+        <div class="product-pricing-light">
+          <% if @product.on_sale? %>
+            <span class="original-price">₹<%= number_with_delimiter(@product.price.to_i) %></span>
+            <span class="sale-price">₹<%= number_with_delimiter(@product.discounted_price.to_i) %></span>
+            <span class="discount-tag">Save <%= @product.discount_percentage %>%</span>
+          <% else %>
+            <span class="current-price">₹<%= number_with_delimiter(@product.price.to_i) %></span>
+          <% end %>
+        </div>
+
+        <% if @product.description.present? %>
+          <div class="product-section-light">
+            <h3>📝 Description</h3>
+            <div class="description-text">
+              <%= simple_format(@product.description) %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @product.specifications.present? && @product.specifications.is_a?(Hash) && @product.specifications.keys.any? %>
+          <div class="product-section-light">
+            <h3>📋 Specifications</h3>
+            <table class="specs-table-light">
+              <% @product.specifications.each do |key, value| %>
+                <tr>
+                  <th><%= key.to_s.humanize %></th>
+                  <td><%= value %></td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        <% end %>
+
+        <!-- Contact CTA -->
+        <div class="product-cta-light">
+          <a href="<%= @social_links["whatsapp"] %>?text=Hi! I'm interested in: <%= @product.name %> (SKU: <%= @product.sku %>)" 
+             target="_blank" 
+             class="btn-whatsapp-light">
+            💬 Enquire on WhatsApp
+          </a>
+          <a href="tel:<%= @contact_info["phone"]&.gsub(/\s/, '') %>" class="btn-phone-light">
+            📞 Call Now
+          </a>
+        </div>
+
+        <a href="<%= @contact_info["google_maps_url"] %>" target="_blank" class="store-info-light">
+          <p>📍 Available at our store</p>
+          <p><strong><%= @site_info["site_name"] %></strong></p>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Related Products -->
+  <% if @related_products.any? %>
+    <section class="related-products-light">
+      <div class="section-container">
+        <h2>Related Products</h2>
+        <div class="products-grid">
+          <% @related_products.each do |product| %>
+            <%= render partial: "products/product_card", locals: { product: product } %>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- Footer -->
+  <%= render partial: "shared/catalog_footer_light" %>
+</div>
+
+<script>
+  // Thumbnail gallery
+  document.querySelectorAll('.thumbnail-light').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      document.querySelectorAll('.thumbnail-light').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      const mainImg = document.getElementById('mainProductImage');
+      if (mainImg) mainImg.src = thumb.dataset.image;
+    });
+  });
+
+  // Mobile hamburger menu
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.getElementById('navMenu');
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    });
+  }
+</script>

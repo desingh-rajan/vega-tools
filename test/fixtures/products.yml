@@ -1,0 +1,32 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+professional_drill:
+  name: Professional Drill
+  slug: professional-drill
+  sku: DRILL-001
+  description: A professional grade drill
+  price: 5000
+  discounted_price: 4500
+  brand: Bosch
+  published: true
+  category: drills
+
+basic_drill:
+  name: Basic Drill
+  slug: basic-drill
+  sku: DRILL-002
+  description: A basic drill for home use
+  price: 2000
+  brand: Stanley
+  published: true
+  category: drills
+
+unpublished_product:
+  name: Unpublished Product
+  slug: unpublished-product
+  sku: UNPUB-001
+  description: This is not published
+  price: 1000
+  brand: Generic
+  published: false
+  category: power_tools

@@ -1,0 +1,12 @@
+# Site Settings: General Category
+# These settings control basic site information
+
+site_info:
+  category: general
+  is_public: true
+  description: Basic site information (name, tagline, description)
+  value:
+    site_name: Vega Tools & Hardwares
+    tagline: Building your dreams with quality tools
+    description: "Dindigul's #1 Tool Store - Authorized POLYMAK dealer"
+    website: https://vegatoolsandhardwares.in/

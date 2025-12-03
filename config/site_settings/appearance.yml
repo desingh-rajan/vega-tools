@@ -1,0 +1,11 @@
+# Site Settings: Appearance Category
+# These settings control theme, colors, and visual appearance
+
+theme_config:
+  category: appearance
+  is_public: true
+  description: Theme and appearance settings
+  value:
+    primary_color: "#f59e0b"
+    secondary_color: "#1e293b"
+    font_family: "Inter, system-ui, sans-serif"

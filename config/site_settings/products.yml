@@ -1,0 +1,33 @@
+# Site Settings: Products Section Configuration
+# Controls the products showcase on the landing page
+
+products_section:
+  category: sections
+  is_public: true
+  description: Products section header and display settings
+  value:
+    title: Our Product Range
+    subtitle: Quality tools for every project
+    show_categories: true
+    products_per_category: 4
+    show_view_all_button: true
+    view_all_text: View All Products
+
+featured_categories:
+  category: sections
+  is_public: true
+  description: Categories to feature on homepage (by slug)
+  value:
+    categories:
+      - slug: safety-helmets
+        title: Safety Helmets
+        description: Professional head protection for construction sites
+      - slug: cordless-drills
+        title: Cordless Drills
+        description: Battery-powered drilling solutions
+      - slug: angle-grinders
+        title: Angle Grinders
+        description: Professional cutting and grinding tools
+      - slug: arc-welding-machines
+        title: Welding Machines
+        description: Industrial welding equipment

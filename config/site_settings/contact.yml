@@ -1,0 +1,23 @@
+# Site Settings: Contact Category
+# These settings control contact information and social links
+
+contact_info:
+  category: contact
+  is_public: true
+  description: Contact details (phone, email, address)
+  value:
+    phone: "095007 16588"
+    email: contact@vegatoolsandhardwares.in
+    website: https://vegatoolsandhardwares.in/
+    address: "No. 583/4B, Dindigul - Trichy Bypass Road, Rajakkapatti, EB Colony, Dindigul District, Tamil Nadu 624004"
+    google_maps_url: https://maps.app.goo.gl/eQ6RmoxqpgrFpksp7
+    store_hours: "Monday - Saturday: 9 AM - 8 PM"
+
+social_links:
+  category: contact
+  is_public: true
+  description: Social media links
+  value:
+    whatsapp: https://wa.me/919500716588
+    instagram: ""
+    facebook: ""

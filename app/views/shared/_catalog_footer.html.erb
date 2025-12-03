@@ -1,0 +1,50 @@
+<footer class="catalog-footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "footer-logo" %>
+        <h3><%= @site_info["site_name"] %></h3>
+        <p><%= @site_info["tagline"] %></p>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><%= link_to "Home", root_path %></li>
+          <li><%= link_to "All Products", products_path %></li>
+          <li><%= link_to "Categories", categories_path %></li>
+          <li><a href="<%= root_path %>#about">About Us</a></li>
+          <li><a href="<%= root_path %>#location">Location</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-contact">
+        <h4>Contact Info</h4>
+        <p>📞 <%= @contact_info["phone"] %></p>
+        <% if @contact_info["email"].present? %>
+          <p>📧 <%= @contact_info["email"] %></p>
+        <% end %>
+        <p>📍 <%= @contact_info["address"]&.split(",")&.first %></p>
+        <% if @social_links && @social_links["whatsapp"].present? %>
+          <p>
+            <a href="<%= @social_links["whatsapp"] %>" target="_blank" class="social-link whatsapp-link">
+              💬 Chat on WhatsApp
+            </a>
+          </p>
+        <% end %>
+      </div>
+      
+      <div class="footer-hours">
+        <h4>Store Hours</h4>
+        <p><%= @contact_info["store_hours"] %></p>
+        <a href="<%= @contact_info["google_maps_url"] %>" target="_blank" class="directions-link">
+          🗺️ Get Directions
+        </a>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; <%= Date.current.year %> <%= @site_info["site_name"] %>. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
