@@ -56,20 +56,30 @@ CATEGORIES_DATA = [
   ] }
 ].freeze
 
+# Preload existing categories to minimize database queries
+existing_categories = Category.all.index_by(&:name)
+
 CATEGORIES_DATA.each do |cat_data|
   children = cat_data[:children] || []
 
-  parent = Category.find_or_create_by!(name: cat_data[:name]) do |c|
-    c.slug = cat_data[:name].parameterize
-    c.icon = cat_data[:icon]
-    c.position = cat_data[:position]
-  end
+  parent = existing_categories[cat_data[:name]] || Category.create!(
+    name: cat_data[:name],
+    slug: cat_data[:name].parameterize,
+    icon: cat_data[:icon],
+    position: cat_data[:position]
+  )
+  existing_categories[cat_data[:name]] = parent
   puts "   ✅ #{parent.name}"
 
   children.each do |child_data|
-    Category.find_or_create_by!(name: child_data[:name], parent: parent) do |c|
-      c.slug = child_data[:name].parameterize
-      c.position = child_data[:position]
+    unless existing_categories[child_data[:name]]
+      child = Category.create!(
+        name: child_data[:name],
+        slug: child_data[:name].parameterize,
+        position: child_data[:position],
+        parent: parent
+      )
+      existing_categories[child_data[:name]] = child
     end
     puts "      └── #{child_data[:name]}"
   end
