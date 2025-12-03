@@ -56,21 +56,31 @@ CATEGORIES_DATA = [
   ] }
 ].freeze
 
+# Preload existing categories to minimize database queries
+# Use composite key (parent_id, name) for children to handle same-named children under different parents
+all_categories = Category.all.to_a
+existing_by_name = all_categories.index_by(&:name)
+existing_by_parent_and_name = all_categories.index_by { |c| [c.parent_id, c.name] }
+
 CATEGORIES_DATA.each do |cat_data|
   children = cat_data[:children] || []
 
-  parent = Category.find_or_create_by!(name: cat_data[:name]) do |c|
+  parent = existing_by_name[cat_data[:name]] || Category.find_or_create_by!(name: cat_data[:name]) do |c|
     c.slug = cat_data[:name].parameterize
     c.icon = cat_data[:icon]
     c.position = cat_data[:position]
   end
+  existing_by_name[cat_data[:name]] = parent
+  existing_by_parent_and_name[[nil, cat_data[:name]]] = parent
   puts "   ✅ #{parent.name}"
 
   children.each do |child_data|
-    Category.find_or_create_by!(name: child_data[:name], parent: parent) do |c|
+    child_key = [parent.id, child_data[:name]]
+    child = existing_by_parent_and_name[child_key] || Category.find_or_create_by!(name: child_data[:name], parent: parent) do |c|
       c.slug = child_data[:name].parameterize
       c.position = child_data[:position]
     end
+    existing_by_parent_and_name[child_key] = child
     puts "      └── #{child_data[:name]}"
   end
 end

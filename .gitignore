@@ -41,3 +41,7 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Ignore implementation/planning documents
+IMPLEMENTATION_PROGRESS.md
+TSTACK_RAILS_KIT_IDEAS.md

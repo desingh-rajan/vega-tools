@@ -201,13 +201,17 @@ ActiveAdmin.register SiteSetting do
       groups["Other"] << setting.key unless all_grouped.include?(setting.key)
     end
 
+    # Preload all settings for all keys in all groups
+    all_keys = groups.values.flatten.uniq
+    settings_by_key = SiteSetting.where(key: all_keys).index_by(&:key)
+
     groups.each do |group_name, keys|
       next if keys.empty?
 
       h4 group_name, style: "margin-top: 10px;"
       ul do
         keys.each do |key|
-          setting = SiteSetting.find_by(key: key)
+          setting = settings_by_key[key]
           if setting
             li link_to(key.humanize.titleize, admin_site_setting_path(setting))
           end
