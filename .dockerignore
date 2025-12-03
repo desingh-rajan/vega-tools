@@ -50,9 +50,8 @@
 /.dockerignore
 /Dockerfile*
 
-# Ignore client resources (PDFs, catalogs) - keep TOOLS images for seeding
-/client-resources/*.pdf
-/client-resources/*.md
+# Ignore client resources (not needed in production - images are in Active Storage)
+/client-resources/
 
 # Ignore test files in production
 /test/
