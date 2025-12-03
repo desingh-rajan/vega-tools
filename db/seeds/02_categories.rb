@@ -58,8 +58,9 @@ CATEGORIES_DATA = [
 
 # Preload existing categories to minimize database queries
 # Use composite key (parent_id, name) for children to handle same-named children under different parents
-existing_by_name = Category.all.index_by(&:name)
-existing_by_parent_and_name = Category.all.index_by { |c| [c.parent_id, c.name] }
+all_categories = Category.all.to_a
+existing_by_name = all_categories.index_by(&:name)
+existing_by_parent_and_name = all_categories.index_by { |c| [c.parent_id, c.name] }
 
 CATEGORIES_DATA.each do |cat_data|
   children = cat_data[:children] || []
