@@ -1,4 +1,6 @@
 class Category < ApplicationRecord
+  include HasProcessedImages
+
   # Self-referential association for subcategories
   belongs_to :parent, class_name: "Category", optional: true
   has_many :children, class_name: "Category", foreign_key: :parent_id, dependent: :destroy
@@ -7,7 +9,11 @@ class Category < ApplicationRecord
   has_many :products, dependent: :nullify
 
   # Active Storage for category icon/image
-  has_one_attached :icon_image
+  # Production: public S3 for direct URLs | Development: S3 dev folder | Test: local disk
+  has_one_attached :icon_image, service: Rails.env.production? ? :amazon_public : (Rails.env.development? ? :amazon_dev : :local)
+
+  # Enable WebP processing for icon_image
+  has_processed_images :icon_image
 
   # Validations
   validates :name, presence: true

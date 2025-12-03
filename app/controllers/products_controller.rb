@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
 
   # GET /products or /products.json
   def index
-    @products = Product.published.includes(:category, images_attachments: :blob).ordered
+    @products = Product.published.includes(:category).ordered
 
     # Filter by category if provided (include products from child categories)
     if params[:category].present?
@@ -41,7 +41,6 @@ class ProductsController < ApplicationController
   def show
     @related_products = @product.category&.products&.published
       &.where&.not(id: @product.id)
-      &.includes(images_attachments: :blob)
       &.limit(4) || []
 
     respond_to do |format|
@@ -55,7 +54,7 @@ class ProductsController < ApplicationController
     query = params[:q].to_s.strip
     @products = Product.published
       .where("name ILIKE :q OR description ILIKE :q OR sku ILIKE :q OR brand ILIKE :q", q: "%#{query}%")
-      .includes(:category, images_attachments: :blob)
+      .includes(:category)
       .limit(20)
 
     respond_to do |format|
@@ -66,7 +65,7 @@ class ProductsController < ApplicationController
 
   # GET /products/featured.json
   def featured
-    @products = Product.published.includes(:category, images_attachments: :blob).limit(8)
+    @products = Product.published.includes(:category).limit(8)
 
     respond_to do |format|
       format.json { render json: @products }
@@ -83,7 +82,7 @@ class ProductsController < ApplicationController
   private
 
   def set_product
-    @product = Product.published.includes(:category, images_attachments: :blob).find_by!(slug: params[:slug])
+    @product = Product.published.includes(:category).find_by!(slug: params[:slug])
   end
 
   def set_site_settings
@@ -101,7 +100,7 @@ class ProductsController < ApplicationController
       .distinct
       .includes(:products)
       .each_with_object({}) do |category, hash|
-        products = category.products.published.includes(images_attachments: :blob).limit(8)
+        products = category.products.published.limit(8)
         hash[category] = products if products.any?
       end
   end

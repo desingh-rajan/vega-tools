@@ -50,8 +50,8 @@
       <!-- Product Images -->
       <div class="product-gallery-light">
         <div class="main-image-light">
-          <% if @product.images.attached? %>
-            <%= image_tag url_for(@product.images.first), 
+          <% if @product.has_images? %>
+            <%= image_tag @product.original_url, 
                 alt: @product.name, 
                 id: "mainProductImage" %>
           <% else %>
@@ -65,12 +65,12 @@
           <% end %>
         </div>
         
-        <% if @product.images.attached? && @product.images.count > 1 %>
+        <% if @product.image_count > 1 %>
           <div class="thumbnail-gallery-light">
-            <% @product.images.each_with_index do |image, index| %>
+            <% @product.image_count.times do |index| %>
               <button class="thumbnail-light <%= 'active' if index == 0 %>" 
-                      data-image="<%= url_for(image) %>">
-                <%= image_tag url_for(image), alt: "#{@product.name} - Image #{index + 1}" %>
+                      data-image="<%= @product.original_url(index) %>">
+                <%= image_tag @product.thumbnail_url(index), alt: "#{@product.name} - Image #{index + 1}" %>
               </button>
             <% end %>
           </div>

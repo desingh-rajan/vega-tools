@@ -2,8 +2,49 @@ class Product < ApplicationRecord
   # Associations
   belongs_to :category, optional: true  # optional for uncategorized products
 
-  # Active Storage for product images
-  has_many_attached :images
+  # S3 Image URL helpers (images stored as: {slug}/original.webp, {slug}/thumbnail.webp)
+  # For multiple images: {slug}/original_1.webp, {slug}/thumbnail_1.webp, etc.
+
+  def image_base_url
+    Rails.configuration.x.s3_images_base_url
+  end
+
+  # Get image URL for a specific variant and index
+  # product.image_url(:original)      => .../product-slug/original.webp
+  # product.image_url(:thumbnail, 1)  => .../product-slug/thumbnail_1.webp
+  def image_url(variant = :original, index = 0)
+    return nil if slug.blank?
+    suffix = index.zero? ? "" : "_#{index}"
+    "#{image_base_url}/#{slug}/#{variant}#{suffix}.webp"
+  end
+
+  def thumbnail_url(index = 0)
+    image_url(:thumbnail, index)
+  end
+
+  def original_url(index = 0)
+    image_url(:original, index)
+  end
+
+  # Get all image URLs (based on image_count in specifications)
+  def all_image_urls(variant = :original)
+    count = specifications&.dig("image_count") || 1
+    (0...count).map { |i| image_url(variant, i) }
+  end
+
+  def all_thumbnail_urls
+    all_image_urls(:thumbnail)
+  end
+
+  # Check if product has any images
+  def has_images?
+    (specifications&.dig("image_count") || 0) > 0
+  end
+
+  # Get image count
+  def image_count
+    specifications&.dig("image_count") || 0
+  end
 
   # Validations
   validates :name, presence: true
@@ -46,7 +87,7 @@ class Product < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    %w[category images_attachments]
+    %w[category]
   end
 
   # Unique brands for filter dropdowns

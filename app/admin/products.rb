@@ -2,7 +2,7 @@ ActiveAdmin.register Product do
   menu priority: 4, label: "Products"
 
   permit_params :name, :slug, :sku, :description, :price, :discounted_price,
-                :brand, :published, :category_id, :specifications, images: []
+                :brand, :published, :category_id, :specifications
 
   # Filters
   filter :name
@@ -24,8 +24,8 @@ ActiveAdmin.register Product do
     selectable_column
     id_column
     column :image do |product|
-      if product.images.attached?
-        image_tag product.images.first, width: 50, height: 50, style: "object-fit: cover;"
+      if product.has_images?
+        image_tag product.thumbnail_url, width: 50, height: 50, style: "object-fit: cover;"
       else
         "-"
       end
@@ -83,7 +83,7 @@ ActiveAdmin.register Product do
       end
       row :specifications do |product|
         if product.specifications.present?
-          pre JSON.pretty_generate(product.specifications)
+          pre JSON.pretty_generate(product.specifications.except("image_count"))
         else
           "-"
         end
@@ -92,16 +92,14 @@ ActiveAdmin.register Product do
         status_tag product.published? ? "Published" : "Draft", class: product.published? ? "yes" : "no"
       end
       row :images do |product|
-        if product.images.attached?
-          product.images.each do |image|
-            span { image_tag image, width: 100, style: "margin: 5px;" }
-          end
-        else
-          "-"
-        end
+        render partial: "admin/products/images_gallery", locals: { product: product }
       end
       row :created_at
       row :updated_at
+    end
+
+    panel "Upload New Images" do
+      render partial: "admin/products/upload_form", locals: { product: resource }
     end
   end
 
@@ -128,14 +126,22 @@ ActiveAdmin.register Product do
               hint: "JSON format, e.g., {\"color\": \"Red\", \"weight\": \"2kg\"}"
     end
 
-    f.inputs "Images" do
-      f.input :images, as: :file, input_html: { multiple: true },
-              hint: "Select multiple images"
-
-      if f.object.images.attached?
-        f.object.images.each do |image|
-          span { image_tag image, width: 80, style: "margin: 5px;" }
+    if f.object.persisted?
+      f.inputs "Current Images" do
+        if f.object.has_images?
+          f.object.image_count.times do |i|
+            div style: "display: inline-block; margin: 10px; text-align: center;" do
+              image_tag f.object.thumbnail_url(i), width: 80, style: "border: 1px solid #ddd;"
+            end
+          end
+          para "Use the Show page to upload new images or delete existing ones.", style: "color: #666; margin-top: 10px;"
+        else
+          para "No images uploaded yet. Save the product first, then use the Show page to upload images."
         end
+      end
+    else
+      f.inputs "Images" do
+        para "Save the product first, then you can upload images from the Show page."
       end
     end
 
@@ -144,6 +150,53 @@ ActiveAdmin.register Product do
     end
 
     f.actions
+  end
+
+  # Member actions for image upload/delete
+  member_action :upload_images, method: :post do
+    if params[:images].present?
+      uploader = ProductImageUploader.new(resource)
+      uploaded = uploader.upload_multiple(params[:images])
+
+      if uploaded.any?
+        redirect_to admin_product_path(resource), notice: "#{uploaded.count} image(s) uploaded successfully!"
+      else
+        redirect_to admin_product_path(resource), alert: "Failed to upload images."
+      end
+    else
+      redirect_to admin_product_path(resource), alert: "No images selected."
+    end
+  end
+
+  member_action :delete_image, method: :delete do
+    index = params[:index].to_i
+    uploader = ProductImageUploader.new(resource)
+    uploader.delete(index)
+
+    redirect_to admin_product_path(resource), notice: "Image #{index + 1} deleted from S3!"
+  end
+
+  member_action :replace_image, method: :patch do
+    index = params[:index].to_i
+    if params[:image].present?
+      uploader = ProductImageUploader.new(resource)
+      result = uploader.replace(params[:image], index)
+
+      if result
+        redirect_to admin_product_path(resource), notice: "Image #{index + 1} replaced in S3!"
+      else
+        redirect_to admin_product_path(resource), alert: "Failed to replace image."
+      end
+    else
+      redirect_to admin_product_path(resource), alert: "No image selected."
+    end
+  end
+
+  member_action :delete_all_images, method: :delete do
+    uploader = ProductImageUploader.new(resource)
+    uploader.delete_all
+
+    redirect_to admin_product_path(resource), notice: "All images deleted!"
   end
 
   # Batch actions

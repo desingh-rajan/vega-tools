@@ -33,7 +33,7 @@ class PagesController < ApplicationController
         category = categories[cat_config["slug"]]
         next unless category
 
-        products = category.products.published.includes(images_attachments: :blob).limit(6)
+        products = category.products.published.limit(6)
         next if products.empty?
 
         {
@@ -51,7 +51,7 @@ class PagesController < ApplicationController
         .distinct
         .limit(6)
         .map do |category|
-          products = category.products.published.includes(images_attachments: :blob).limit(6)
+          products = category.products.published.limit(6)
           {
             category: category,
             title: category.name,

@@ -1,10 +1,29 @@
 # =============================================================================
-# PRODUCTS SEED - Products with images
+# PRODUCTS SEED - Products with images (converted to WebP, uploaded to S3)
 # =============================================================================
 puts "📦 Creating products..."
 
+require "aws-sdk-s3"
+
 # Image directory path
 IMAGES_DIR = ENV.fetch("SEED_IMAGES_DIR", Rails.root.join("client-resources/TOOLS images").to_s)
+
+# S3 Configuration (hardcoded for seeding, uses credentials from ~/.aws/credentials)
+S3_BUCKET = "tstack-desingh"
+S3_REGION = "ap-south-1"
+S3_PREFIX = Rails.env.production? ? "vega-tools/prod/images" : "vega-tools/dev/images"
+
+# Initialize S3 client
+S3_CLIENT = Aws::S3::Client.new(region: S3_REGION)
+
+# Check if vips is available for WebP conversion
+VIPS_AVAILABLE = begin
+  require "vips"
+  true
+rescue LoadError
+  puts "   ⚠️  libvips not found - images will NOT be uploaded"
+  false
+end
 
 # Collect all valid image files (excluding .psd, .pdf, .HEIC)
 ALL_IMAGES = if File.directory?(IMAGES_DIR)
@@ -61,40 +80,96 @@ def images_for_category(category_name)
   matched.empty? ? ALL_IMAGES : matched
 end
 
-# Helper to attach images - tries patterns first, then category-based random
-def attach_product_images(product, patterns, category_name)
-  return unless File.directory?(IMAGES_DIR)
-  attached = false
+# Upload file to S3
+def upload_to_s3(io, s3_key)
+  io.rewind if io.respond_to?(:rewind)
+
+  S3_CLIENT.put_object(
+    bucket: S3_BUCKET,
+    key: s3_key,
+    body: io,
+    content_type: "image/webp",
+    acl: "public-read"
+  )
+  true
+rescue => e
+  puts "      ⚠️  S3 upload error: #{e.message}"
+  false
+end
+
+# Convert image to WebP and return temp files
+def convert_image_to_webp(source_path, max_size)
+  return nil unless File.exist?(source_path)
+
+  image = Vips::Image.new_from_file(source_path, access: :sequential)
+  scale = [ max_size.to_f / image.width, max_size.to_f / image.height ].min
+  resized = scale < 1 ? image.resize(scale) : image
+
+  temp = Tempfile.new([ "webp_", ".webp" ])
+  resized.webpsave(temp.path, Q: 85)
+  temp.rewind
+  temp
+rescue => e
+  puts "      ⚠️  Conversion error: #{e.message}"
+  nil
+end
+
+# Upload product images to S3 with slug-based paths
+# Structure: {prefix}/{slug}/original.webp, thumbnail.webp, original_1.webp, etc.
+def upload_product_images(product, patterns, category_name)
+  return 0 unless File.directory?(IMAGES_DIR)
+  return 0 unless VIPS_AVAILABLE
+  return 0 if product.slug.blank?
+
+  images_to_upload = []
 
   # First try specific patterns
   patterns.each do |pattern|
     Dir.glob(File.join(IMAGES_DIR, pattern)).each do |path|
       next unless File.exist?(path) && path =~ /\.(jpg|jpeg|png|webp)$/i
-      content_type = case path.downcase
-      when /\.png$/ then "image/png"
-      when /\.webp$/ then "image/webp"
-      else "image/jpeg"
-      end
-      product.images.attach(io: File.open(path), filename: File.basename(path), content_type: content_type)
-      attached = true
+      images_to_upload << path
     end
   end
 
-  # If no images attached, pick 1-3 random images from category or all
-  unless attached
+  # If no images found, pick 1-3 random images from category or all
+  if images_to_upload.empty?
     category_images = images_for_category(category_name)
-    random_images = category_images.sample(rand(1..3))
-    random_images.each do |path|
-      content_type = case path.downcase
-      when /\.png$/ then "image/png"
-      when /\.webp$/ then "image/webp"
-      else "image/jpeg"
-      end
-      product.images.attach(io: File.open(path), filename: File.basename(path), content_type: content_type)
-    end
+    images_to_upload = category_images.sample(rand(1..3))
   end
+
+  uploaded_count = 0
+
+  # Convert and upload each image
+  images_to_upload.each_with_index do |path, idx|
+    # S3 keys: {prefix}/{slug}/original.webp or original_1.webp for additional
+    suffix = idx.zero? ? "" : "_#{idx}"
+    original_key = "#{S3_PREFIX}/#{product.slug}/original#{suffix}.webp"
+    thumbnail_key = "#{S3_PREFIX}/#{product.slug}/thumbnail#{suffix}.webp"
+
+    # Convert and upload original (1200px max)
+    original_file = convert_image_to_webp(path, 1200)
+    if original_file && upload_to_s3(original_file, original_key)
+      uploaded_count += 1
+    end
+    original_file&.close
+
+    # Convert and upload thumbnail (300px max)
+    thumbnail_file = convert_image_to_webp(path, 300)
+    upload_to_s3(thumbnail_file, thumbnail_key) if thumbnail_file
+    thumbnail_file&.close
+  end
+
+  # Store image count in specifications
+  if uploaded_count > 0
+    specs = product.specifications || {}
+    specs["image_count"] = uploaded_count
+    product.update_column(:specifications, specs)
+  end
+
+  uploaded_count
 rescue => e
-  puts "      ⚠️  Image attach error for #{product.name}: #{e.message}"
+  puts "      ⚠️  Image upload error for #{product.name}: #{e.message}"
+  0
 end
 
 # Helper to find category
@@ -1235,16 +1310,14 @@ PRODUCTS_DATA.each do |data|
   )
   product.save!
 
-  # Attach images - always attach if product has no images
-  unless product.images.attached?
-    attach_product_images(product, images, category_name)
-    images_attached_count += 1 if product.images.attached?
-  end
+  # Upload images to S3 with slug-based paths
+  uploaded = upload_product_images(product, images, category_name)
+  images_attached_count += 1 if uploaded > 0
 
   created_count += 1
   print "\r   📦 Processing #{created_count}/#{PRODUCTS_DATA.count} products..."
 end
 
 puts "\n   ✅ Created/Updated #{created_count} products"
-puts "   🖼️  Attached images to #{images_attached_count} products"
-puts "   📊 Total products: #{Product.count} (#{Product.joins(:images_attachments).distinct.count} with images)"
+puts "   🖼️  Uploaded images for #{images_attached_count} products"
+puts "   📊 Total products: #{Product.count}"

@@ -23,12 +23,19 @@ class SiteSetting < ApplicationRecord
   # System keys are all keys defined in YAML defaults
   SYSTEM_KEYS = DEFAULTS.keys.map(&:to_s).freeze
 
+  include HasProcessedImages
+
   # Associations
   belongs_to :updated_by, class_name: "User", optional: true
 
   # Active Storage for images (logo, carousel, etc.)
-  has_one_attached :logo
-  has_many_attached :images
+  # Production: public S3 for direct URLs | Development: S3 dev folder | Test: local disk
+  has_one_attached :logo, service: Rails.env.production? ? :amazon_public : (Rails.env.development? ? :amazon_dev : :local)
+  has_many_attached :images, service: Rails.env.production? ? :amazon_public : (Rails.env.development? ? :amazon_dev : :local)
+
+  # Enable WebP processing for logo and images
+  has_processed_images :logo
+  has_processed_images :images
 
   # Validations
   validates :key, presence: true, uniqueness: true

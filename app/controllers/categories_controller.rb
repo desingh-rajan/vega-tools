@@ -14,7 +14,7 @@ class CategoriesController < ApplicationController
 
   # GET /categories/:slug or /categories/:slug.json
   def show
-    @products = @category.all_products.published.includes(:category, images_attachments: :blob).ordered
+    @products = @category.all_products.published.includes(:category).ordered
     @subcategories = @category.children.active.ordered
     @breadcrumbs = @category.ancestors.reverse + [ @category ]
 
@@ -26,7 +26,7 @@ class CategoriesController < ApplicationController
 
   # GET /categories/:slug/products.json
   def products
-    @products = @category.all_products.published.includes(:category, images_attachments: :blob).ordered
+    @products = @category.all_products.published.includes(:category).ordered
 
     respond_to do |format|
       format.html { redirect_to category_path(@category) }

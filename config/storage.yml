@@ -6,13 +6,38 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
-# Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
-# amazon:
-#   service: S3
-#   access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
-#   secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
-#   region: us-east-1
-#   bucket: your_own_bucket-<%= Rails.env %>
+# Amazon S3 Storage for Development
+# Files stored under: vega-tools/dev/images/
+amazon_dev:
+  service: S3Prefixed
+  access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
+  region: ap-south-1
+  bucket: tstack-desingh
+  prefix: vega-tools/dev/images
+  public: true
+
+# Amazon S3 Storage for Production
+# Files stored under: vega-tools/prod/images/
+amazon_prod:
+  service: S3Prefixed
+  access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
+  region: ap-south-1
+  bucket: tstack-desingh
+  prefix: vega-tools/prod/images
+  public: true
+
+# Public images storage (for product images, category icons, logos, etc.)
+# Files here are publicly accessible via direct S3 URLs
+amazon_public:
+  service: S3Prefixed
+  access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
+  region: ap-south-1
+  bucket: tstack-desingh
+  prefix: vega-tools/prod/images
+  public: true
 
 # Remember not to checkin your GCS keyfile to a repository
 # google:

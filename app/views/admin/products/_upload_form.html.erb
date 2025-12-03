@@ -1,0 +1,8 @@
+<%= form_tag upload_images_admin_product_path(product), method: :post, multipart: true, class: "upload-images-form" do %>
+  <div style="margin-bottom: 15px;">
+    <%= file_field_tag "images[]", multiple: true, accept: "image/*", style: "padding: 10px; border: 1px solid #ddd; border-radius: 4px;" %>
+  </div>
+  <div>
+    <%= submit_tag "Upload Images", class: "button" %>
+  </div>
+<% end %>

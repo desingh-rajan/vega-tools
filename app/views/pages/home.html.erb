@@ -177,8 +177,8 @@
                 <%= link_to product_path(product.slug), class: "product-card-link" do %>
                   <div class="product-card">
                     <div class="product-image">
-                      <% if product.images.attached? && product.images.first.present? %>
-                        <%= image_tag url_for(product.images.first), alt: product.name %>
+                      <% if product.has_images? %>
+                        <%= image_tag product.thumbnail_url, alt: product.name %>
                       <% else %>
                         <div class="no-image">
                           <span>📦</span>
