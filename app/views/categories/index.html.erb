@@ -62,7 +62,7 @@
               <div class="category-content">
                 <h3 class="category-name"><%= category.name %></h3>
                 <div class="category-stats">
-                  <span class="stat"><%= category.products.published.count %> products</span>
+                  <span class="stat"><%= category.all_products.published.count %> products</span>
                   <% if category.children.any? %>
                     <span class="stat"><%= category.children.count %> subcategories</span>
                   <% end %>
