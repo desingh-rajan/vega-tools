@@ -6,10 +6,13 @@ class ProductsController < ApplicationController
   def index
     @products = Product.published.includes(:category, images_attachments: :blob).ordered
 
-    # Filter by category if provided
+    # Filter by category if provided (include products from child categories)
     if params[:category].present?
       @category = Category.find_by(slug: params[:category])
-      @products = @products.by_category(@category.id) if @category
+      if @category
+        category_ids = [ @category.id ] + @category.descendants.map(&:id)
+        @products = @products.where(category_id: category_ids)
+      end
     end
 
     # Filter by brand if provided

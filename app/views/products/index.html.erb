@@ -112,13 +112,13 @@
               <%= link_to "View All →", category_path(category.slug), class: "view-all-link" %>
             </div>
             <div class="products-scroll-container">
-              <button class="scroll-btn scroll-left" aria-label="Scroll left">‹</button>
+              <button type="button" class="scroll-btn scroll-left" aria-label="Scroll left">‹</button>
               <div class="products-scroll">
                 <% products.each do |product| %>
                   <%= render partial: "products/product_card", locals: { product: product } %>
                 <% end %>
               </div>
-              <button class="scroll-btn scroll-right" aria-label="Scroll right">›</button>
+              <button type="button" class="scroll-btn scroll-right" aria-label="Scroll right">›</button>
             </div>
           </section>
         <% end %>
@@ -133,29 +133,61 @@
   </main>
 
   <!-- Footer -->
-  <%= render partial: "shared/catalog_footer" %>
+  <%= render partial: "shared/catalog_footer_light" %>
 </div>
 
 <script>
-  // Horizontal scroll buttons
-  document.querySelectorAll('.products-scroll-container').forEach(container => {
-    const scrollEl = container.querySelector('.products-scroll');
-    const leftBtn = container.querySelector('.scroll-left');
-    const rightBtn = container.querySelector('.scroll-right');
-    
-    if (leftBtn && rightBtn && scrollEl) {
-      leftBtn.addEventListener('click', () => scrollEl.scrollBy({ left: -300, behavior: 'smooth' }));
-      rightBtn.addEventListener('click', () => scrollEl.scrollBy({ left: 300, behavior: 'smooth' }));
-    }
-  });
+  (function() {
+    // Wait for DOM to be ready
+    function initScrollButtons() {
+      const containers = document.querySelectorAll('.products-scroll-container');
+      
+      containers.forEach(function(container) {
+        const scrollEl = container.querySelector('.products-scroll');
+        const leftBtn = container.querySelector('.scroll-left');
+        const rightBtn = container.querySelector('.scroll-right');
+        
+        if (leftBtn && scrollEl) {
+          leftBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const scrollAmount = scrollEl.clientWidth * 0.8;
+            scrollEl.scrollTo({
+              left: scrollEl.scrollLeft - scrollAmount,
+              behavior: 'smooth'
+            });
+          }, false);
+        }
+        
+        if (rightBtn && scrollEl) {
+          rightBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const scrollAmount = scrollEl.clientWidth * 0.8;
+            scrollEl.scrollTo({
+              left: scrollEl.scrollLeft + scrollAmount,
+              behavior: 'smooth'
+            });
+          }, false);
+        }
+      });
 
-  // Mobile hamburger menu
-  const hamburger = document.getElementById('hamburger');
-  const navMenu = document.getElementById('navMenu');
-  if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
-      hamburger.classList.toggle('active');
-    });
-  }
+      // Mobile hamburger menu
+      const hamburger = document.getElementById('hamburger');
+      const navMenu = document.getElementById('navMenu');
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function() {
+          navMenu.classList.toggle('active');
+          hamburger.classList.toggle('active');
+        });
+      }
+    }
+
+    // Run on DOMContentLoaded or immediately if already loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initScrollButtons);
+    } else {
+      initScrollButtons();
+    }
+  })();
 </script>

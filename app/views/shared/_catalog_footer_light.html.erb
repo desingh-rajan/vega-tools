@@ -1,0 +1,50 @@
+<footer class="footer-light">
+  <div class="footer-container-light">
+    <div class="footer-content-light">
+      <div class="footer-brand-light">
+        <%= image_tag "vega-logo.png", alt: @site_info["site_name"], class: "footer-logo-light" %>
+        <h3><%= @site_info["site_name"] %></h3>
+        <p><%= @site_info["tagline"] %></p>
+      </div>
+      
+      <div class="footer-links-light">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><%= link_to "Home", root_path %></li>
+          <li><%= link_to "All Products", products_path %></li>
+          <li><%= link_to "Categories", categories_path %></li>
+          <li><a href="<%= root_path %>#about">About Us</a></li>
+          <li><a href="<%= root_path %>#location">Location</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-contact-light">
+        <h4>Contact Info</h4>
+        <p><span class="contact-icon">📞</span> <a href="tel:<%= @contact_info["phone"]&.gsub(/\s/, '') %>"><%= @contact_info["phone"] %></a></p>
+        <% if @contact_info["email"].present? %>
+          <p><span class="contact-icon">📧</span> <%= @contact_info["email"] %></p>
+        <% end %>
+        <p><span class="contact-icon">📍</span> <%= @contact_info["address"]&.split(",")&.first %></p>
+        <% if @social_links && @social_links["whatsapp"].present? %>
+          <p>
+            <a href="<%= @social_links["whatsapp"] %>" target="_blank" class="whatsapp-btn-light">
+              💬 Chat on WhatsApp
+            </a>
+          </p>
+        <% end %>
+      </div>
+      
+      <div class="footer-hours-light">
+        <h4>Store Hours</h4>
+        <p><%= @contact_info["store_hours"] %></p>
+        <a href="<%= @contact_info["google_maps_url"] %>" target="_blank" class="directions-btn-light">
+          🗺️ Get Directions
+        </a>
+      </div>
+    </div>
+    
+    <div class="footer-bottom-light">
+      <p>&copy; <%= Date.current.year %> <%= @site_info["site_name"] %>. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
