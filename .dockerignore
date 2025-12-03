@@ -49,3 +49,11 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore client resources (PDFs, catalogs) - keep TOOLS images for seeding
+/client-resources/*.pdf
+/client-resources/*.md
+
+# Ignore test files in production
+/test/
+/spec/
