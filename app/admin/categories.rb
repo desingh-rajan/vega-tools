@@ -28,7 +28,12 @@ ActiveAdmin.register Category do
     column :slug
     column :parent
     column :products do |category|
-      link_to category.products.count, admin_products_path(q: { category_id_eq: category.id })
+      count = category.all_products.count
+      if count > 0
+        link_to count, admin_products_path(q: { category_id_in: [ category.id ] + category.descendants.map(&:id) })
+      else
+        0
+      end
     end
     column :position
     column :created_at
