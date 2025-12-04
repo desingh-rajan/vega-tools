@@ -1,17 +1,49 @@
 class Product < ApplicationRecord
-  # Associations
-  belongs_to :category, optional: true  # optional for uncategorized products
+  belongs_to :category, optional: true
 
-  # S3 Image URL helpers (images stored as: {slug}/original.webp, {slug}/thumbnail.webp)
-  # For multiple images: {slug}/original_1.webp, {slug}/thumbnail_1.webp, etc.
+  validates :name, presence: true
+  validates :sku, presence: true, uniqueness: true
+  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :discounted_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validate :discounted_price_less_than_price
 
-  def image_base_url
-    Rails.configuration.x.s3_images_base_url
+  before_validation :generate_slug, if: -> { slug.blank? && name.present? }
+
+  scope :published, -> { where(published: true) }
+  scope :unpublished, -> { where(published: false) }
+  scope :by_category, ->(category_id) { where(category_id: category_id) }
+  scope :by_brand, ->(brand) { where(brand: brand) }
+  scope :uncategorized, -> { where(category_id: nil) }
+  scope :ordered, -> { order(created_at: :desc) }
+  scope :price_between, ->(min, max) { where(price: min..max) }
+
+  class << self
+    def ransackable_attributes(_auth_object = nil)
+      %w[name slug sku description price discounted_price brand published category_id created_at]
+    end
+
+    def ransackable_associations(_auth_object = nil)
+      %w[category]
+    end
+
+    def available_brands
+      where.not(brand: [ nil, "" ]).distinct.pluck(:brand).sort
+    end
   end
 
-  # Get image URL for a specific variant and index
-  # product.image_url(:original)      => .../product-slug/original.webp
-  # product.image_url(:thumbnail, 1)  => .../product-slug/thumbnail_1.webp
+  def discount_percentage
+    return 0 unless discounted_price.present? && price.present? && price > 0
+    ((price - discounted_price) / price * 100).round
+  end
+
+  def effective_price
+    discounted_price.presence || price
+  end
+
+  def on_sale?
+    discounted_price.present? && discounted_price < price
+  end
+
   def image_url(variant = :original, index = 0)
     return nil if slug.blank?
     suffix = index.zero? ? "" : "_#{index}"
@@ -26,76 +58,27 @@ class Product < ApplicationRecord
     image_url(:original, index)
   end
 
-  # Get all image URLs (based on image_count in specifications)
   def all_image_urls(variant = :original)
-    count = specifications&.dig("image_count") || 1
-    (0...count).map { |i| image_url(variant, i) }
+    (0...image_count).map { |i| image_url(variant, i) }
   end
 
   def all_thumbnail_urls
     all_image_urls(:thumbnail)
   end
 
-  # Check if product has any images
   def has_images?
-    (specifications&.dig("image_count") || 0) > 0
+    image_count.positive?
   end
 
-  # Get image count
   def image_count
     specifications&.dig("image_count") || 0
   end
 
-  # Validations
-  validates :name, presence: true
-  validates :sku, presence: true, uniqueness: true
-  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :discounted_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validate :discounted_price_less_than_price
-
-  # Auto-generate slug from name
-  before_validation :generate_slug, if: -> { slug.blank? && name.present? }
-
-  # Scopes
-  scope :published, -> { where(published: true) }
-  scope :unpublished, -> { where(published: false) }
-  scope :by_category, ->(category_id) { where(category_id: category_id) }
-  scope :by_brand, ->(brand) { where(brand: brand) }
-  scope :uncategorized, -> { where(category_id: nil) }
-  scope :ordered, -> { order(created_at: :desc) }
-  scope :price_between, ->(min, max) { where(price: min..max) }
-
-  # Calculate discount percentage
-  def discount_percentage
-    return 0 unless discounted_price.present? && price.present? && price > 0
-    ((price - discounted_price) / price * 100).round
-  end
-
-  # Effective price (discounted if available)
-  def effective_price
-    discounted_price.presence || price
-  end
-
-  # Check if on sale
-  def on_sale?
-    discounted_price.present? && discounted_price < price
-  end
-
-  # For Ransack search (Active Admin)
-  def self.ransackable_attributes(auth_object = nil)
-    %w[name slug sku description price discounted_price brand published category_id created_at]
-  end
-
-  def self.ransackable_associations(auth_object = nil)
-    %w[category]
-  end
-
-  # Unique brands for filter dropdowns
-  def self.available_brands
-    where.not(brand: [ nil, "" ]).distinct.pluck(:brand).sort
-  end
-
   private
+
+  def image_base_url
+    Rails.configuration.x.s3_images_base_url
+  end
 
   def generate_slug
     base_slug = name.parameterize
@@ -111,8 +94,7 @@ class Product < ApplicationRecord
   end
 
   def discounted_price_less_than_price
-    if discounted_price.present? && price.present? && discounted_price >= price
-      errors.add(:discounted_price, "must be less than original price")
-    end
+    return unless discounted_price.present? && price.present? && discounted_price >= price
+    errors.add(:discounted_price, "must be less than original price")
   end
 end
