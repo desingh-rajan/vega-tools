@@ -24,8 +24,8 @@ ActiveAdmin.register Product do
     selectable_column
     id_column
     column :image do |product|
-      if product.has_images?
-        image_tag product.thumbnail_url, width: 50, height: 50, style: "object-fit: cover;"
+      if product.s3_has_images?
+        image_tag product.s3_thumbnail_url, width: 50, height: 50, style: "object-fit: cover;"
       else
         "-"
       end
@@ -128,10 +128,10 @@ ActiveAdmin.register Product do
 
     if f.object.persisted?
       f.inputs "Current Images" do
-        if f.object.has_images?
-          f.object.image_count.times do |i|
+        if f.object.s3_has_images?
+          f.object.s3_image_count.times do |i|
             div style: "display: inline-block; margin: 10px; text-align: center;" do
-              image_tag f.object.thumbnail_url(i), width: 80, style: "border: 1px solid #ddd;"
+              image_tag f.object.s3_thumbnail_url(i), width: 80, style: "border: 1px solid #ddd;"
             end
           end
           para "Use the Show page to upload new images or delete existing ones.", style: "color: #666; margin-top: 10px;"

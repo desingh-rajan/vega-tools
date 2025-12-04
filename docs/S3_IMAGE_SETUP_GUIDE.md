@@ -48,42 +48,6 @@ end
 
 ---
 
-## Two Approaches Compared
-
-### Approach 1: Active Storage (Complex - What We Started With)
-
-Pros:
-
-- Rails convention
-- Built-in variants/transformations
-- Automatic cleanup
-
-Cons:
-
-- Random blob keys (ugly URLs like `/blobs/abc123xyz...`)
-- Hard to customize folder structure
-- Requires S3PrefixedService hack for prefixes
-- Complex for simple use cases
-
-### Approach 2: s3_webp_uploader Gem (Simple - What We Ended With) ✅
-
-Pros:
-
-- Full control over folder structure
-- Predictable, SEO-friendly URLs
-- No monkey-patching Rails internals
-- Easy to understand and debug
-- Reusable across projects
-
-Cons:
-
-- Manual cleanup on delete (handled by gem)
-- No built-in variants (but we want WebP anyway)
-
-**Verdict:** For public product images with predictable URLs, the gem is simpler.
-
----
-
 ## The Simple Setup (Using the Gem)
 
 ### 1. AWS S3 Bucket Setup
@@ -302,33 +266,6 @@ end
 1. Re-seed with source images available
 2. Manually upload via admin panel
 3. Ensure slug generation is deterministic
-
----
-
-## What S3PrefixedService Does (And Why You Don't Need It)
-
-```ruby
-# This file exists at: lib/active_storage/service/s3_prefixed_service.rb
-```
-
-**What it does:**
-
-- Extends Active Storage's S3Service
-- Adds a prefix to all blob keys (e.g., `vega-tools/dev/images/`)
-- Attempts to generate meaningful keys instead of random ones
-
-**Why we created it:**
-
-- Wanted organized folder structure in S3
-- Wanted to keep using Active Storage
-
-**Why you don't need it:**
-
-- It's monkey-patching Rails internals
-- Active Storage still generates random keys for the actual blob
-- Direct S3 upload is simpler and gives full control
-
-**Recommendation:** Delete this file and use direct S3 uploads for product images. Keep Active Storage only for truly private files that need signed URLs.
 
 ---
 

@@ -1,7 +1,7 @@
 <%= link_to product_path(product.slug), class: "product-card" do %>
   <div class="product-image">
-    <% if product.has_images? %>
-      <%= image_tag product.thumbnail_url, alt: product.name, loading: "lazy" %>
+    <% if product.s3_has_images? %>
+      <%= image_tag product.s3_thumbnail_url, alt: product.name, loading: "lazy" %>
     <% else %>
       <div class="no-image">
         <span>📦</span>

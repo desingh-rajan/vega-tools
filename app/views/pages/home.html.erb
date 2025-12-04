@@ -177,8 +177,8 @@
                 <%= link_to product_path(product.slug), class: "product-card-link" do %>
                   <div class="product-card">
                     <div class="product-image">
-                      <% if product.has_images? %>
-                        <%= image_tag product.thumbnail_url, alt: product.name %>
+                      <% if product.s3_has_images? %>
+                        <%= image_tag product.s3_thumbnail_url, alt: product.name %>
                       <% else %>
                         <div class="no-image">
                           <span>📦</span>

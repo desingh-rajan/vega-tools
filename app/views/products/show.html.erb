@@ -50,8 +50,8 @@
       <!-- Product Images -->
       <div class="product-gallery-light">
         <div class="main-image-light">
-          <% if @product.has_images? %>
-            <%= image_tag @product.original_url, 
+          <% if @product.s3_has_images? %>
+            <%= image_tag @product.s3_original_url, 
                 alt: @product.name, 
                 id: "mainProductImage" %>
           <% else %>
@@ -65,12 +65,12 @@
           <% end %>
         </div>
         
-        <% if @product.image_count > 1 %>
+        <% if @product.s3_image_count > 1 %>
           <div class="thumbnail-gallery-light">
-            <% @product.image_count.times do |index| %>
+            <% @product.s3_image_count.times do |index| %>
               <button class="thumbnail-light <%= 'active' if index == 0 %>" 
-                      data-image="<%= @product.original_url(index) %>">
-                <%= image_tag @product.thumbnail_url(index), alt: "#{@product.name} - Image #{index + 1}" %>
+                      data-image="<%= @product.s3_original_url(index) %>">
+                <%= image_tag @product.s3_thumbnail_url(index), alt: "#{@product.name} - Image #{index + 1}" %>
               </button>
             <% end %>
           </div>

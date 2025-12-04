@@ -1,12 +1,6 @@
 class Product < ApplicationRecord
   include S3WebpUploader::ImageHelpers
 
-  # Aliases for backward compatibility with views
-  alias_method :thumbnail_url, :s3_thumbnail_url
-  alias_method :original_url, :s3_original_url
-  alias_method :image_count, :s3_image_count
-  alias_method :has_images?, :s3_has_images?
-
   belongs_to :category, optional: true
 
   validates :name, presence: true
