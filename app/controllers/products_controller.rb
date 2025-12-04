@@ -21,7 +21,7 @@ class ProductsController < ApplicationController
     # Search
     if params[:q].present?
       search_term = "%#{params[:q]}%"
-      @products = @products.where("name ILIKE :q OR description ILIKE :q OR brand ILIKE :q", q: search_term)
+      @products = @products.where("name LIKE :q OR description LIKE :q OR brand LIKE :q", q: search_term)
     end
 
     # Get all root categories with products for sidebar/filter
@@ -53,7 +53,7 @@ class ProductsController < ApplicationController
   def search
     query = params[:q].to_s.strip
     @products = Product.published
-      .where("name ILIKE :q OR description ILIKE :q OR sku ILIKE :q OR brand ILIKE :q", q: "%#{query}%")
+      .where("name LIKE :q OR description LIKE :q OR sku LIKE :q OR brand LIKE :q", q: "%#{query}%")
       .includes(:category)
       .limit(20)
 
