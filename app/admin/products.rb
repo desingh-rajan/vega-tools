@@ -155,8 +155,8 @@ ActiveAdmin.register Product do
   # Member actions for image upload/delete
   member_action :upload_images, method: :post do
     if params[:images].present?
-      uploader = ProductImageUploader.new(resource)
-      uploaded = uploader.upload_multiple(params[:images])
+      uploader = resource.s3_image_uploader
+      uploaded = uploader.upload_all(params[:images])
 
       if uploaded.any?
         redirect_to admin_product_path(resource), notice: "#{uploaded.count} image(s) uploaded successfully!"
@@ -170,8 +170,7 @@ ActiveAdmin.register Product do
 
   member_action :delete_image, method: :delete do
     index = params[:index].to_i
-    uploader = ProductImageUploader.new(resource)
-    uploader.delete(index)
+    resource.s3_image_uploader.delete(index)
 
     redirect_to admin_product_path(resource), notice: "Image #{index + 1} deleted from S3!"
   end
@@ -179,8 +178,7 @@ ActiveAdmin.register Product do
   member_action :replace_image, method: :patch do
     index = params[:index].to_i
     if params[:image].present?
-      uploader = ProductImageUploader.new(resource)
-      result = uploader.replace(params[:image], index)
+      result = resource.s3_image_uploader.replace(index, params[:image])
 
       if result
         redirect_to admin_product_path(resource), notice: "Image #{index + 1} replaced in S3!"
@@ -193,8 +191,7 @@ ActiveAdmin.register Product do
   end
 
   member_action :delete_all_images, method: :delete do
-    uploader = ProductImageUploader.new(resource)
-    uploader.delete_all
+    resource.s3_image_uploader.delete_all
 
     redirect_to admin_product_path(resource), notice: "All images deleted!"
   end
