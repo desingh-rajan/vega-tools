@@ -1,4 +1,12 @@
 class Product < ApplicationRecord
+  include S3WebpUploader::ImageHelpers
+
+  # Aliases for backward compatibility with views
+  alias_method :thumbnail_url, :s3_thumbnail_url
+  alias_method :original_url, :s3_original_url
+  alias_method :image_count, :s3_image_count
+  alias_method :has_images?, :s3_has_images?
+
   belongs_to :category, optional: true
 
   validates :name, presence: true
@@ -44,41 +52,7 @@ class Product < ApplicationRecord
     discounted_price.present? && discounted_price < price
   end
 
-  def image_url(variant = :original, index = 0)
-    return nil if slug.blank?
-    suffix = index.zero? ? "" : "_#{index}"
-    "#{image_base_url}/#{slug}/#{variant}#{suffix}.webp"
-  end
-
-  def thumbnail_url(index = 0)
-    image_url(:thumbnail, index)
-  end
-
-  def original_url(index = 0)
-    image_url(:original, index)
-  end
-
-  def all_image_urls(variant = :original)
-    (0...image_count).map { |i| image_url(variant, i) }
-  end
-
-  def all_thumbnail_urls
-    all_image_urls(:thumbnail)
-  end
-
-  def has_images?
-    image_count.positive?
-  end
-
-  def image_count
-    specifications&.dig("image_count") || 0
-  end
-
   private
-
-  def image_base_url
-    Rails.configuration.x.s3_images_base_url
-  end
 
   def generate_slug
     base_slug = name.parameterize

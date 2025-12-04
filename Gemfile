@@ -52,6 +52,9 @@ gem "image_processing", "~> 1.2"
 # AWS S3 for Active Storage [https://guides.rubyonrails.org/active_storage_overview.html#s3-service-amazon-s3-and-s3-compatible-apis]
 gem "aws-sdk-s3", require: false
 
+# S3 WebP Uploader - Direct S3 uploads with WebP conversion
+gem "s3_webp_uploader", github: "desingh-rajan/s3_webp_uploader"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
