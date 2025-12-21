@@ -2,6 +2,10 @@ class Product < ApplicationRecord
   include S3WebpUploader::ImageHelpers
 
   belongs_to :category, optional: true
+  
+  # Ensure specifications is always a Hash
+  after_initialize :ensure_specifications_is_hash
+  before_validation :ensure_specifications_is_hash
 
   validates :name, presence: true
   validates :sku, presence: true, uniqueness: true
@@ -64,5 +68,19 @@ class Product < ApplicationRecord
   def discounted_price_less_than_price
     return unless discounted_price.present? && price.present? && discounted_price >= price
     errors.add(:discounted_price, "must be less than original price")
+  end
+  
+  def ensure_specifications_is_hash
+    return if specifications.nil?
+    
+    if specifications.is_a?(String)
+      begin
+        self.specifications = JSON.parse(specifications)
+      rescue JSON::ParserError
+        self.specifications = {}
+      end
+    elsif !specifications.is_a?(Hash)
+      self.specifications = {}
+    end
   end
 end

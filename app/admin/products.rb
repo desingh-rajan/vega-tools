@@ -24,10 +24,14 @@ ActiveAdmin.register Product do
     selectable_column
     id_column
     column :image do |product|
-      if product.s3_has_images?
-        image_tag product.s3_thumbnail_url, width: 50, height: 50, style: "object-fit: cover;"
-      else
-        "-"
+      begin
+        if product.s3_has_images?
+          image_tag product.s3_thumbnail_url, width: 50, height: 50, style: "object-fit: cover;"
+        else
+          "-"
+        end
+      rescue StandardError => e
+        span "⚠️", title: "Image error: #{e.message}", style: "color: orange;"
       end
     end
     column :name do |product|
@@ -216,11 +220,13 @@ ActiveAdmin.register Product do
 
   action_item :toggle_publish, only: :show do
     if resource.published?
-      link_to "Unpublish", toggle_publish_admin_product_path(resource), method: :put,
-              data: { confirm: "Unpublish this product?" }
+      button_to "Unpublish", toggle_publish_admin_product_path(resource), method: :put,
+                data: { confirm: "Unpublish this product?", turbo: false },
+                form: { style: "display: inline-block;" }
     else
-      link_to "Publish", toggle_publish_admin_product_path(resource), method: :put,
-              data: { confirm: "Publish this product?" }
+      button_to "Publish", toggle_publish_admin_product_path(resource), method: :put,
+                data: { confirm: "Publish this product?", turbo: false },
+                form: { style: "display: inline-block;" }
     end
   end
 
