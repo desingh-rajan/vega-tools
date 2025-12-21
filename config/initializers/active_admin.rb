@@ -203,9 +203,9 @@ ActiveAdmin.setup do |config|
   # tag. You can reset the hash of meta tags included in logged out
   # pages:
   #   config.meta_tags_for_logged_out_pages = {}
-  
+
   # Disable Turbo for ActiveAdmin to fix method: :put and method: :delete issues
-  config.meta_tags = { 'turbo-visit-control': 'reload' }
+  config.meta_tags = { 'turbo-visit-control': "reload" }
   config.head = '<meta name="turbo-visit-control" content="reload">'.html_safe
 
   # == Removing Breadcrumbs

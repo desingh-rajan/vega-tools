@@ -230,6 +230,13 @@ ActiveAdmin.register Product do
     end
   end
 
+  action_item :destroy, only: :show do
+    button_to "Delete Product", admin_product_path(resource), method: :delete,
+              data: { confirm: "Are you sure you want to delete this product?", turbo: false },
+              form: { style: "display: inline-block;" },
+              class: "button"
+  end
+
   # Sidebar
   sidebar "Quick Stats", only: :index do
     ul do
