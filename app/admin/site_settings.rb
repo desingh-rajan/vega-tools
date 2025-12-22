@@ -167,9 +167,11 @@ ActiveAdmin.register SiteSetting do
 
   action_item :reset, only: :show do
     if SiteSetting::DEFAULTS[resource.key]
-      link_to "Reset to Default", reset_to_default_admin_site_setting_path(resource),
-              method: :put,
-              data: { confirm: "Reset this setting to its default value?" }
+      button_to "Reset to Default", reset_to_default_admin_site_setting_path(resource),
+                method: :put,
+                data: { confirm: "Reset this setting to its default value?", turbo: false },
+                form: { style: "display: inline-block;" },
+                class: "button"
     end
   end
 
@@ -180,9 +182,11 @@ ActiveAdmin.register SiteSetting do
   end
 
   action_item :seed_defaults, only: :index do
-    link_to "Seed All Defaults", seed_defaults_admin_site_settings_path,
-            method: :post,
-            data: { confirm: "This will create any missing default settings. Existing settings will not be overwritten. Continue?" }
+    button_to "Seed All Defaults", seed_defaults_admin_site_settings_path,
+              method: :post,
+              data: { confirm: "This will create any missing default settings. Existing settings will not be overwritten. Continue?", turbo: false },
+              form: { style: "display: inline-block;" },
+              class: "button"
   end
 
   # Sidebar with categories

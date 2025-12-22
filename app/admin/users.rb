@@ -1,6 +1,9 @@
 ActiveAdmin.register User do
   menu priority: 2, label: "Users"
 
+  # Remove default destroy button to avoid Turbo issues and use our custom button
+  config.remove_action_item(:destroy)
+
   permit_params :email, :password, :password_confirmation, :name, :role, :phone_number, :country_code
 
   # Filters
@@ -79,15 +82,28 @@ ActiveAdmin.register User do
 
   action_item :promote, only: :show do
     if current_user.super_admin? && resource.user?
-      link_to "Promote to Admin", promote_to_admin_admin_user_path(resource), method: :put,
-              data: { confirm: "Promote #{resource.name} to Admin?" }
+      button_to "Promote to Admin", promote_to_admin_admin_user_path(resource), method: :put,
+                data: { confirm: "Promote #{resource.name} to Admin?", turbo: false },
+                form: { style: "display: inline-block;" },
+                class: "button"
     end
   end
 
   action_item :demote, only: :show do
     if current_user.super_admin? && resource.admin? && resource != current_user
-      link_to "Demote to User", demote_to_user_admin_user_path(resource), method: :put,
-              data: { confirm: "Demote #{resource.name} to regular user?" }
+      button_to "Demote to User", demote_to_user_admin_user_path(resource), method: :put,
+                data: { confirm: "Demote #{resource.name} to regular user?", turbo: false },
+                form: { style: "display: inline-block;" },
+                class: "button"
+    end
+  end
+
+  action_item :delete_user, only: :show do
+    if resource != current_user
+      button_to "Delete User", admin_user_path(resource), method: :delete,
+                data: { confirm: "Are you sure you want to delete this user?", turbo: false },
+                form: { style: "display: inline-block;" },
+                class: "button"
     end
   end
 

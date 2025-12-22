@@ -1,6 +1,9 @@
 ActiveAdmin.register Category do
   menu priority: 3, label: "Categories"
 
+  # Remove default destroy button to avoid Turbo issues and use our custom button
+  config.remove_action_item(:destroy)
+
   permit_params :name, :slug, :description, :icon, :position, :parent_id, :icon_image
 
   # Filters
@@ -124,5 +127,12 @@ ActiveAdmin.register Category do
       para link_to "View all #{resource.products.count} products",
                    admin_products_path(q: { category_id_eq: resource.id })
     end
+  end
+
+  action_item :delete_category, only: :show do
+    button_to "Delete Category", admin_category_path(resource), method: :delete,
+              data: { confirm: "Are you sure you want to delete this category?", turbo: false },
+              form: { style: "display: inline-block;" },
+              class: "button"
   end
 end

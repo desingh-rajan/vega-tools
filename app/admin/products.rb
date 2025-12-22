@@ -1,6 +1,9 @@
 ActiveAdmin.register Product do
   menu priority: 4, label: "Products"
 
+  # Remove default destroy button to avoid duplicates with our custom Turbo-compatible button
+  config.remove_action_item(:destroy)
+
   permit_params :name, :slug, :sku, :description, :price, :discounted_price,
                 :brand, :published, :category_id, :specifications
 
@@ -222,15 +225,17 @@ ActiveAdmin.register Product do
     if resource.published?
       button_to "Unpublish", toggle_publish_admin_product_path(resource), method: :put,
                 data: { confirm: "Unpublish this product?", turbo: false },
-                form: { style: "display: inline-block;" }
+                form: { style: "display: inline-block;" },
+                class: "button"
     else
       button_to "Publish", toggle_publish_admin_product_path(resource), method: :put,
                 data: { confirm: "Publish this product?", turbo: false },
-                form: { style: "display: inline-block;" }
+                form: { style: "display: inline-block;" },
+                class: "button"
     end
   end
 
-  action_item :destroy, only: :show do
+  action_item :delete_product, only: :show do
     button_to "Delete Product", admin_product_path(resource), method: :delete,
               data: { confirm: "Are you sure you want to delete this product?", turbo: false },
               form: { style: "display: inline-block;" },
